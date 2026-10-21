@@ -144,7 +144,7 @@ Compiled from the Git history and from `reference-td1.csv`. **Each member should
 | Chandra R S Sukumar | Verification of batch D; references C11-C12 |
 | Ismaël Wane | Independent check of C15-C16 |
 | Nesrine Aissa | References C19-C20 |
-| Nazim | References C03-C04; reference fixes; README; re-check of batch C; verification of batch A; drafts of the B and E notes; verbatim prompt file; restored the first run of batch D; this report |
+| Nazim Yacine | References C03-C04; reference fixes; README; re-check of batch C; verification of batch A; drafts of the B and E notes; verbatim prompt file; restored the first run of batch D; this report |
 
 **Use of AI assistance.** We used an AI coding assistant during the session, working back and forth with small, step-by-step prompts. Its outputs were checked manually and together within the sub-group. Reference values come from SQL executed on the database, never from a model's answer.
 

@@ -1,7 +1,7 @@
 # Verification of batch A: groq:openai/gpt-oss-120b
 
 - Operator: Antonin CHARRON (author of commit `b923182`)
-- Checked by: Nazim
+- Checked by: Nazim YACINE
 - Date of check: 2026-10-21
 - Files checked: `traces-A.csv`, `state-A.jsonl` (commit `b923182`), against `reference-td1.csv`
 - Comparison rows produced: [`comparison-A.csv`](comparison-A.csv), to merge into `model-question-comparison-en.csv`
