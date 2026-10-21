@@ -1,7 +1,7 @@
 # Verification of batch C: openrouter:cohere/north-mini-code:free
 
 - Operator: Akihitorh (author of commit `b72962e`)
-- Checked by: _(name of the checker)_
+- Checked by: Baptiste MARSEILLE
 - Date of check: 2026-10-21
 - Files checked: `traces-C.csv`, `state-C.jsonl` (commit `b72962e`), against `reference-td1.csv`
 - Comparison rows produced: [`comparison-C.csv`](comparison-C.csv), to merge into `model-question-comparison-en.csv`
