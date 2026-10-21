@@ -15,13 +15,13 @@
 | **Antonin Charron** | Operator A (`groq:openai/gpt-oss-120b`, 20/20); references C01-C02; comparison and summary CSVs; `.gitignore` |
 | **Baudouin Parent** | Operator B (`groq:openai/gpt-oss-20b`); references C17-C18; merged raw traces into `traces-td1.csv`; check of batch B |
 | **Akihito Raffin** | Committed batch C (`openrouter:cohere/north-mini-code:free`); references C09-C10 |
-| **Adrian Bernard** | Operator D (`groq:qwen/qwen3.8-27b`); OpenRouter account for batch C; batch C note alignment; references C13-C14 and `sql/` |
+| **Adrian Bernard** | Operator D (`groq:qwen/qwen3.8-27b`); batch C note alignment; references C13-C14 and `sql/` |
 | **Vivien Perrault** | Operator E (`openrouter:dots-studio/dots-3-note-preview:free`); references C05-C06; check of batch E |
 | **Baptiste Marseille** | Verification of batch C; references C07-C08 |
 | **Chandra R S Sukumar** | Verification of batch D; references C11-C12 |
 | **Ismaël Wane** | Independent check of C15-C16 |
 | **Nesrine Aissa** | References C19-C20 |
-| **Nazim** | References C03-C04; reference validation; README; batch verification notes; verbatim prompt; report `reports/td1.md` |
+| **Nazim Yacine** | References C03-C04; reference validation; README; batch verification notes; verbatim prompt; report `reports/td1.md` |
 
 ### Key verification commands
 
