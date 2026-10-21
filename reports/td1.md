@@ -150,8 +150,7 @@ Compiled from the Git history and from `reference-td1.csv`. **Each member should
 
 ## 10. Next steps (TD 2)
 
-1. Vivien confirms the OpenRouter account used for batch E in `verif/verification-E.md`.
-2. Merge the verified explanations from `verif/comparison-*.csv` into `model-question-comparison-en.csv`, if the sub-group wants the more precise wording.
-3. Write the k-of-n vote in `atelier-vote.py`. Test it on C02, C15 and C17, where three models fail: a majority vote across the five models can still be wrong if the failures agree, so plan an independent check of the age logic.
-4. Turn the routing hypothesis (section 5) into the sub-group's routing rule and test it with `atelier-routage.py`.
-5. Rotate roles as required by the protocol.
+1. Merge the verified explanations from `verif/comparison-*.csv` into `model-question-comparison-en.csv`, if the sub-group wants the more precise wording.
+2. Write the k-of-n vote in `atelier-vote.py`. Test it on C02, C15 and C17, where three models fail: a majority vote across the five models can still be wrong if the failures agree, so plan an independent check of the age logic.
+3. Turn the routing hypothesis (section 5) into the sub-group's routing rule and test it with `atelier-routage.py`.
+4. Rotate roles as required by the protocol.
