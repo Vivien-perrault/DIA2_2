@@ -1,6 +1,6 @@
 provider,model_id,public_index,index_date,index_source,paid_route_same_model,input_usd_per_million,output_usd_per_million,price_date,price_source,access_used,period_results,age_results,product_results,combined_results,trace_files,limits
 groq,openai/gpt-oss-120b,11.6,2026-09-28,portefeuille-modeles-2026-09-28.csv,openrouter,0.15,0.6,2026-09-28,portefeuille-modeles-2026-09-28.csv,groq (free plan),100% (6/6),100% (5/5),100% (4/4),100% (5/5),traces-A.csv,"1024 tokens output cap, low reasoning effort"
-groq,openai/gpt-oss-20b,,,,,,,,,,,,,,,
-openrouter,cohere/north-mini-code:free,,,,,,,,,,,,,,,
-groq,qwen/qwen3.8-27b,,,,,,,,,,,,,,,
-openrouter,dots-studio/dots-3-note-preview:free,,,,,,,,,,,,,,,
+groq,openai/gpt-oss-20b,9,2026-09-28,portefeuille-modeles-2026-09-28.csv,N/A,N/A,N/A,N/A,N/A,groq (free plan),100% (6/6),80% (4/5),100% (4/4),100% (5/5),traces-B.csv,"1024 tokens output cap, low reasoning effort, TPM limit 8000"
+openrouter,cohere/north-mini-code:free,N/A,N/A,N/A (selection 14/10/2026),N/A,N/A,N/A,N/A,N/A,openrouter (free plan),100% (6/6),0% (0/5),100% (4/4),40% (2/5),traces-C.csv,"1024 tokens output cap, reasoning disabled"
+groq,qwen/qwen3.8-27b,33.7,2026-09-28,portefeuille-modeles-2026-09-28.csv,N/A,N/A,N/A,N/A,N/A,groq (free plan),100% (6/6),80% (4/5),100% (4/4),40% (2/5),traces-D.csv,"1000 tokens output cap, reasoning_effort none"
+openrouter,dots-studio/dots-3-note-preview:free,N/A,N/A,N/A (selection 14/10/2026),N/A,N/A,N/A,N/A,N/A,openrouter (free plan),100% (6/6),20% (1/5),100% (4/4),40% (2/5),traces-E.csv,"1024 tokens output cap, reasoning disabled"
