@@ -3,6 +3,49 @@
 
 > Final. Pack 2026-10-18-students-1. Set your machine up with [Before TD 1](../before-td1-en.html).
 
+### Project metadata & Sub-group Members
+
+* **Sub-group** : DIA2_2 (Promo 2026, Majeure DIA - ESILV)
+* **Pack version** : `Pack 2026-10-18-students-1` (Data seed: `20260925`)
+* **Database SHA-256 (`data/boutique.sqlite`)** : `0077e235adc2ca647b484e3083c98a6d7cae3ef3655ce366a299caf13398fec2`
+* **Environment** : Python 3.10+ (tested on Python 3.12 / 3.13), SQLite 3.45+, `requests`. API keys via local environment variables (`GROQ_API_KEY`, `OPENROUTER_API_KEY`).
+
+| Member | Role / TD 1 Contribution |
+|---|---|
+| **Antonin Charron** | Operator A (`groq:openai/gpt-oss-120b`, 20/20); references C01-C02; comparison and summary CSVs; `.gitignore` |
+| **Baudouin Parent** | Operator B (`groq:openai/gpt-oss-20b`); references C17-C18; merged raw traces into `traces-td1.csv`; check of batch B |
+| **Akihito Raffin** | Committed batch C (`openrouter:cohere/north-mini-code:free`); references C09-C10 |
+| **Adrian Bernard** | Operator D (`groq:qwen/qwen3.8-27b`); OpenRouter account for batch C; batch C note alignment; references C13-C14 and `sql/` |
+| **Vivien Perrault** | Operator E (`openrouter:dots-studio/dots-3-note-preview:free`); references C05-C06; check of batch E |
+| **Baptiste Marseille** | Verification of batch C; references C07-C08 |
+| **Chandra R S Sukumar** | Verification of batch D; references C11-C12 |
+| **Ismaël Wane** | Independent check of C15-C16 |
+| **Nesrine Aissa** | References C19-C20 |
+| **Nazim** | References C03-C04; reference validation; README; batch verification notes; verbatim prompt; report `reports/td1.md` |
+
+### Key verification commands
+
+```powershell
+python check_access.py                      # Verify Python version, DB hash, model endpoints
+python verify-data.py                       # Verify SHA-256 hashes of all DB and CSV data files
+python sandbox_sqlite.py --db data/boutique.sqlite  # Run 25 sandbox self-tests
+python skeleton-multi-llm-en.py --rates     # Display rates per model from traces-td1.jsonl
+```
+
+### TD 1 Status & Completed Artefacts
+
+* [x] **`reference-td1.csv`** : 20 reference queries and values verified independently.
+* [x] **`traces-td1.csv` & `traces-td1.jsonl`** : 102 API attempts (100 first attempts, 2 rate-limit retries) with raw metrics.
+* [x] **`model-question-comparison-en.csv`** : 100 rows with precise causes and SQL evidence.
+* [x] **`five-model-summary-en.csv`** : Sourced public indices, documented prices, results by family (period, age, product, combined).
+* [x] **`prompts-en.md`** : Verbatim system prompt and user template.
+* [x] **`reports/td1.md`** : Comprehensive session report.
+
+### Open blocks / Next steps for TD 2
+
+1. Design the k-of-n consensus voting logic in `atelier-vote.py` (focusing on majority failure cases like C02, C15, C17).
+2. Design and evaluate routing rules on synthetic scenarios via `atelier-routage.py`.
+
 Kit of 14 October 2026 for the three sessions of 21 October, 18 November and
 11 December. The database and the twenty questions are the same for every
 sub-group. Read the environment guide first and finish preparation by 18 October inclusive; each assignment gives the schedule of its afternoon.
