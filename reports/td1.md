@@ -138,7 +138,7 @@ Compiled from the Git history and from `reference-td1.csv`. **Each member should
 | Antonin Charron | Operator A (gpt-oss-120b, 20/20); references C01-C02; filled the comparison and summary CSVs; `.gitignore` |
 | Baudouin Parent | Operator B (gpt-oss-20b); references C17-C18; merged the raw traces into `traces-td1.csv`; check of batch B |
 | Akihito Raffin | Committed batch C (north-mini-code) traces; references C09-C10 |
-| Adrian Bernard | Operator D (qwen3.8-27b, run and rerun); OpenRouter account used for batch C; aligned the batch C note with the committed traces; references C13-C14 and `sql/` |
+| Adrian Bernard | Operator D (qwen3.8-27b, run and rerun); aligned the batch C note with the committed traces; references C13-C14 and `sql/` |
 | Vivien Perrault | Operator E (dots-3-note); references C05-C06; check of batch E |
 | Baptiste Marseille | Verification of batch C; references C07-C08 |
 | Chandra R S Sukumar | Verification of batch D; references C11-C12 |
