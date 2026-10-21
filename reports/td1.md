@@ -146,6 +146,8 @@ Compiled from the Git history and from `reference-td1.csv`. **Each member should
 | Nesrine Aissa | References C19-C20 |
 | Nazim | References C03-C04; reference fixes; README; re-check of batch C; verification of batch A; drafts of the B and E notes; verbatim prompt file; restored the first run of batch D; this report |
 
+**Use of AI assistance.** We used an AI coding assistant during the session, working back and forth with small, step-by-step prompts. Its outputs were checked manually and together within the sub-group. Reference values come from SQL executed on the database, never from a model's answer.
+
 ## 10. Next steps (TD 2)
 
 1. Vivien confirms the OpenRouter account used for batch E in `verif/verification-E.md`.
