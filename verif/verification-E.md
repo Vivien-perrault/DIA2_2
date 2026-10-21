@@ -3,7 +3,7 @@
 - Operator: Vivien PERRAULT (author of commit `4e13fdb`)
 - Checked by: Vivien
 - Date of check: 2026-10-21
-- OpenRouter account used: _(to confirm by the operator)_, distinct from the account used for batch C (Adrian BERNARD)
+- OpenRouter account used: Vivien PERRAULT's personal account, distinct from the account used for batch C (operator: Akihitorh, commit `b72962e`)
 - Files checked: `traces-E.csv`, `state-E.jsonl` (commit `4e13fdb`), against `reference-td1.csv`
 - Comparison rows produced: [`comparison-E.csv`](comparison-E.csv), to merge into `model-question-comparison-en.csv`
 

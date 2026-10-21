@@ -138,18 +138,19 @@ Compiled from the Git history and from `reference-td1.csv`. **Each member should
 | Antonin Charron | Operator A (gpt-oss-120b, 20/20); references C01-C02; filled the comparison and summary CSVs; `.gitignore` |
 | Baudouin Parent | Operator B (gpt-oss-20b); references C17-C18; merged the raw traces into `traces-td1.csv`; check of batch B |
 | Akihito Raffin | Committed batch C (north-mini-code) traces; references C09-C10 |
-| Adrian Bernard | Operator D (qwen3.8-27b, run and rerun); OpenRouter account used for batch C; aligned the batch C note with the committed traces; references C13-C14 and `sql/` |
+| Adrian Bernard | Operator D (qwen3.8-27b, run and rerun); aligned the batch C note with the committed traces; references C13-C14 and `sql/` |
 | Vivien Perrault | Operator E (dots-3-note); references C05-C06; check of batch E |
 | Baptiste Marseille | Verification of batch C; references C07-C08 |
 | Chandra R S Sukumar | Verification of batch D; references C11-C12 |
 | Ismaël Wane | Independent check of C15-C16 |
 | Nesrine Aissa | References C19-C20 |
-| Nazim | References C03-C04; reference fixes; README; re-check of batch C; verification of batch A; drafts of the B and E notes; verbatim prompt file; restored the first run of batch D; this report |
+| Nazim Yacine | References C03-C04; reference fixes; README; re-check of batch C; verification of batch A; drafts of the B and E notes; verbatim prompt file; restored the first run of batch D; this report |
+
+**Use of AI assistance.** We used an AI coding assistant during the session, working back and forth with small, step-by-step prompts. Its outputs were checked manually and together within the sub-group. Reference values come from SQL executed on the database, never from a model's answer.
 
 ## 10. Next steps (TD 2)
 
-1. Vivien confirms the OpenRouter account used for batch E in `verif/verification-E.md`.
-2. Merge the verified explanations from `verif/comparison-*.csv` into `model-question-comparison-en.csv`, if the sub-group wants the more precise wording.
-3. Write the k-of-n vote in `atelier-vote.py`. Test it on C02, C15 and C17, where three models fail: a majority vote across the five models can still be wrong if the failures agree, so plan an independent check of the age logic.
-4. Turn the routing hypothesis (section 5) into the sub-group's routing rule and test it with `atelier-routage.py`.
-5. Rotate roles as required by the protocol.
+1. Merge the verified explanations from `verif/comparison-*.csv` into `model-question-comparison-en.csv`, if the sub-group wants the more precise wording.
+2. Write the k-of-n vote in `atelier-vote.py`. Test it on C02, C15 and C17, where three models fail: a majority vote across the five models can still be wrong if the failures agree, so plan an independent check of the age logic.
+3. Turn the routing hypothesis (section 5) into the sub-group's routing rule and test it with `atelier-routage.py`.
+4. Rotate roles as required by the protocol.
