@@ -8,14 +8,14 @@ C06,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C06,real,correct,0,
 C07,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C07,real,correct,13970,13970,Matches the reference; last attempt 1
 C08,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C08,real,correct,605580,605580,Matches the reference; last attempt 1
 C09,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C09,real,correct,487980,487980,Matches the reference; last attempt 1
-C10,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C10,real,correct,558980,558980,Matches the reference; last attempt 1
+C10,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C10,real,incorrect,119410,558980,"Age at the time of the order wrong: second branch uses year difference 24 before the birthday (age 23) instead of 26 (age 25), so it matches nothing; only customers who turned 25 earlier in the order's year are counted (119410); the missing branch is worth 439570 (119410 + 439570 = 558980); last attempt 1"
 C11,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C11,real,correct,446690,446690,Matches the reference; last attempt 1
 C12,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C12,real,correct,1666490,1666490,Matches the reference; last attempt 1
 C13,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C13,real,correct,107740,107740,Matches the reference; last attempt 1
 C14,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C14,real,correct,0,0,Matches the reference; last attempt 1
 C15,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C15,real,incorrect,0,168680,"Age filter wrong: compares birth month-day only and ignores the year; the two month-day bounds contradict each other, so no customer matches (value 0); last attempt 1"
-C16,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C16,real,correct,376740,376740,"Matches the reference; attempt 1 got HTTP 429 (OTPM), last attempt 2"
+C16,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C16,real,correct,376740,376740,Matches the reference; last attempt 1
 C17,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C17,real,incorrect,248490,258180,"Age boundary off by one day: keeps 2001 births strictly before 09-25 and 2000 births from 09-25 on (should be 2001 up to 09-25 inclusive, 2000 strictly after). C001 (2001-09-25, 80190) wrongly excluded, C004 (2000-09-25, 70500) wrongly included: 258180 - 80190 + 70500 = 248490; last attempt 1"
-C18,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C18,real,not_executed,,62480,"Access failure, not a wrong answer: HTTP 429 Groq output-tokens-per-minute limit (OTPM 1000) on both attempts; retry budget exhausted, no SQL returned, value absent; last attempt 2"
-C19,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C19,real,incorrect,83580,1990,"Age filter has no effect: compares a 4-digit year string ('2026') with a full date ('2026-09-25') as text, true for 56 of 59 customers; 83580 equals the revenue of product d in September 2026 for all customers; attempt 1 got HTTP 429 (OTPM), last attempt 2"
-C20,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C20,real,correct,1106090,1106090,"Matches the reference; attempt 1 got HTTP 429 (OTPM), last attempt 2"
+C18,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C18,real,correct,62480,62480,Matches the reference; last attempt 1
+C19,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C19,real,incorrect,83580,1990,"Age filter has no effect: compares a 4-digit year string ('2026') with a full date ('2026-09-25') as text, true for 56 of 59 customers; 83580 equals the revenue of product d in September 2026 for all customers; last attempt 1"
+C20,groq:qwen/qwen3.8-27b,traces-D.csv,groq:qwen/qwen3.8-27b:C20,real,correct,1106090,1106090,Matches the reference; last attempt 1
