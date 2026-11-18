@@ -54,6 +54,8 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 - **C02 en contre-exemple** : 0 obtient 3 voix sur 5 et gagne le vote 3 sur 5, alors que le panel 2 sur 3 donne la bonne valeur 590320.
 - **DEMO-VOTE fait** (étape 1) : `>` donne 0, `>=` donne 100, propositions `[0, 0, 100]`, le vote 2 sur 3 renvoie 0 alors que la référence vaut 100, donc faux consensus. Script `td2/sql/demo-vote.py`, section 2.0 du rapport.
 
+- **Confirmation dans les traces (étape 2)**. Les 102 lignes donnent 100 dernières tentatives distinctes sur 20 questions et 5 modèles. C02, C08 et C10 sont les seuls cas avec une valeur incorrecte partagée. C10 est retenu. Sa référence indépendante est de 558980 centimes (`checked_by` = Akihito Raffin). Les cinq `cell_id` figurent dans la section 2.1 du rapport.
+
 ## Étapes
 
 ### Partie 0 – Mécanisme (exemple jouet, pas un cas d'analyse)
@@ -63,7 +65,7 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 
 ### Partie A – Identification et verdict des quorums
 
-- [ ] **Étape 2 – Confirmer le cas dans les traces**
+- [x] **Étape 2 – Confirmer le cas dans les traces** — fait par Baptiste le 2026-11-18
   Relire `td1/traces-td1.csv` sur les 5 modèles (dernière tentative par modèle) et vérifier le tableau des « Résultats déjà acquis ». Valider C10 comme cas principal, ou argumenter un autre choix. Noter dans le rapport (section 2.1) : identifiant, modèles d'accord, valeur fausse, référence (`td1/reference-td1.csv`, colonne `checked_by` comprise), nature `real` (exécuté pendant notre TD1). Ajouter les `cell_id` concernés.
 
 - [ ] **Étape 3 – Quorum 2 sur 3 (panel fixe)**
