@@ -23,9 +23,20 @@
 | **Nesrine Aissa** | References C19-C20 |
 | **Nazim Yacine** | References C03-C04; reference validation; README; batch verification notes; verbatim prompt; report `reports/td1.md` |
 
+### Repository layout
+
+| Folder | Content |
+|---|---|
+| [`td1/`](td1/) | Runnable kit (code, `data/`, schema, questions, authorised models, protocol and environment guide) + TD 1 statement and deliverables (references, traces, comparisons, `verif/`, `sql/`, `prompts/`, `reports/td1.md`). |
+| [`td2/`](td2/) | TD 2 statement, `atelier-vote.py` (loads `../td1/skeleton-multi-llm-en.py`), `atelier-routage.py`. |
+| [`td3/`](td3/) | TD 3 statement, cost method (`methode-cout-en`), model portfolio (`portefeuille-modeles-en` + CSV). |
+
+The kit scripts expect to be run from `td1/` (they resolve files next to themselves). The vote is implemented in `td1/skeleton-multi-llm-en.py`.
+
 ### Key verification commands
 
 ```powershell
+cd td1
 python check_access.py                      # Verify Python version, DB hash, model endpoints
 python verify-data.py                       # Verify SHA-256 hashes of all DB and CSV data files
 python sandbox_sqlite.py --db data/boutique.sqlite  # Run 25 sandbox self-tests
@@ -43,8 +54,8 @@ python skeleton-multi-llm-en.py --rates     # Display rates per model from trace
 
 ### Open blocks / Next steps for TD 2
 
-1. Design the k-of-n consensus voting logic in `atelier-vote.py` (focusing on majority failure cases like C02, C15, C17).
-2. Design and evaluate routing rules on synthetic scenarios via `atelier-routage.py`.
+1. Design the k-of-n consensus voting logic (`vote_k_sur_n` in `td1/skeleton-multi-llm-en.py`, exercised by `td2/atelier-vote.py`) (focusing on majority failure cases like C02, C15, C17).
+2. Design and evaluate routing rules on synthetic scenarios via `td2/atelier-routage.py`.
 
 Kit of 14 October 2026 for the three sessions of 21 October, 18 November and
 11 December. The database and the twenty questions are the same for every
@@ -54,7 +65,7 @@ sub-group. Read the environment guide first and finish preparation by 18 October
 
 | File | Role |
 |---|---|
-| [guide-environnement-etudiant-en](guide-environnement-etudiant-en.html) | Install Python, create the two free accounts and the keys, then run `check_access.py`. |
+| [guide-environnement-etudiant-en](td1/guide-environnement-etudiant-en.html) | Install Python, create the two free accounts and the keys, then run `check_access.py`. |
 | `check_access.py` | Checks your Python version, the hash of the database and the access to every authorised model; one OK or KO per line. |
 | `modeles-autorises.json` | The authorised models: exact identifiers, call parameters and batch limits, read by `check_access.py` and by the skeleton. |
 | `.gitignore` | Keeps environment files, keys, virtual environments and caches out of your public repository. Keep it at the root of the repository. |
@@ -63,10 +74,10 @@ sub-group. Read the environment guide first and finish preparation by 18 October
 
 | File | Role |
 |---|---|
-| [enonce-td1-en](enonce-td1-en.html) | TD 1: compare the authorised models on the same twenty questions. |
-| [enonce-td2-en](enonce-td2-en.html) | TD 2: the k-of-n vote, then the routing rule of your sub-group. |
-| [enonce-td3-en](enonce-td3-en.html) | TD 3: quantify each configuration, choose one for a named use case, present it. |
-| [consigne-etudiante-en](consigne-etudiante-en.html) | The protocol: task, schema, conventions, accounts, call rules, models, calls planned, offline fallback, hand-in, the twenty questions. |
+| [enonce-td1-en](td1/enonce-td1-en.html) | TD 1: compare the authorised models on the same twenty questions. |
+| [enonce-td2-en](td2/enonce-td2-en.html) | TD 2: the k-of-n vote, then the routing rule of your sub-group. |
+| [enonce-td3-en](td3/enonce-td3-en.html) | TD 3: quantify each configuration, choose one for a named use case, present it. |
+| [consigne-etudiante-en](td1/consigne-etudiante-en.html) | The protocol: task, schema, conventions, accounts, call rules, models, calls planned, offline fallback, hand-in, the twenty questions. |
 
 ## The case
 
@@ -76,7 +87,7 @@ sub-group. Read the environment guide first and finish preparation by 18 October
 | `data/product.csv`, `data/customers.csv`, `data/orders.csv` | The same data as CSV files, for a spreadsheet or a check by hand. |
 | `data/manifest.json` | SHA-256 hashes of the database and of the CSV files, row counts, integrity checks. |
 | `schema.sql` | The three tables, sent to the models in the prompt. |
-| [questions-td1-en](questions-td1-en.html) | The twenty questions, without answers. |
+| [questions-td1-en](td1/questions-td1-en.html) | The twenty questions, without answers. |
 | `questions-td1.json` | The same questions, read by the skeleton. |
 | `reference-td1.csv` | Template of step 1 of TD 1: your reference query and its value for each question. |
 
@@ -93,9 +104,9 @@ sub-group. Read the environment guide first and finish preparation by 18 October
 
 | File | Role |
 |---|---|
-| [portefeuille-modeles-en](portefeuille-modeles-en.html) | Sixty model and access pairs in five capability groups, with public index, prices and access routes. |
+| [portefeuille-modeles-en](td3/portefeuille-modeles-en.html) | Sixty model and access pairs in five capability groups, with public index, prices and access routes. |
 | `portefeuille-modeles-2026-09-28.csv` | The same table as a CSV file, for a spreadsheet. |
-| [methode-cout-en](methode-cout-en.html) | The step-by-step method: read the tokens of a trace, choose a dated price, compute one call, one configuration, then an annual bill. |
+| [methode-cout-en](td3/methode-cout-en.html) | The step-by-step method: read the tokens of a trace, choose a dated price, compute one call, one configuration, then an annual bill. |
 
 ## TD 1 summaries
 
@@ -103,7 +114,7 @@ sub-group. Read the environment guide first and finish preparation by 18 October
 |---|---|
 | `model-question-comparison-en.csv` | One final result per model/question, verdict, explanation and raw-trace pointer; display its pivot matrix. |
 | `five-model-summary-en.csv` | Five models, documented index and prices, access and results by family. |
-| [comparison-example-en](comparison-example-en.html) | Column definitions and a fictional presentation example, unrelated to lab answers. |
+| [comparison-example-en](td1/comparison-example-en.html) | Column definitions and a fictional presentation example, unrelated to lab answers. |
 
 ## Inventory
 
@@ -114,12 +125,12 @@ sub-group. Read the environment guide first and finish preparation by 18 October
 ## Start
 
 ```bash
-cd kit-td1
+cd td1
 python3 check_access.py                       # Python, database hash, one probe per authorised model
 python3 skeleton-multi-llm-en.py --demo       # the whole chain on three simulated models, no key, no network
-python3 atelier-routage.py                    # the seven routing scenarios, no network
+python3 ../td2/atelier-routage.py             # the seven routing scenarios, no network
 ```
 
-Then step 1 of [enonce-td1-en](enonce-td1-en.html): fill in `reference-td1.csv`. Step 2 uses the allocation and `--models` / `--cases` commands in the assignment. The base batch is 100 cells (60 Groq, 40 OpenRouter); controls and retries are separate, with at most one retry per cell. Each operator checks their own allowance. Keep the CSV and JSONL attempts.
+Then step 1 of [enonce-td1-en](td1/enonce-td1-en.html): fill in `reference-td1.csv`. Step 2 uses the allocation and `--models` / `--cases` commands in the assignment. The base batch is 100 cells (60 Groq, 40 OpenRouter); controls and retries are separate, with at most one retry per cell. Each operator checks their own allowance. Keep the CSV and JSONL attempts.
 
 The assessment sheet, the hand-in page and the hand-in templates are one folder above this runnable kit. [Before TD 1](../before-td1-en.html) gives the preparation steps to follow before the first session.

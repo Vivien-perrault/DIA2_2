@@ -1,6 +1,6 @@
 # TD 2 - The quorum, then the routing rule
 
-> Beta. Pack 2026-10-18-students-1. Set your machine up with [Before TD 1](../before-td1-en.html).
+> Beta. Pack 2026-10-18-students-1. Set your machine up with [Before TD 1](../../before-td1-en.html).
 
 **Module: Trustworthy generative AI. Session 2 (18 November), 13:30 to 18:00.**
 
@@ -33,7 +33,7 @@ routing rule is written and exercised on a simulator.
   (OpenRouter), `qwen/qwen3.8-27b` (Groq).
 - `atelier-routage.py`: a routing simulator on three fictitious resources and
   seven scenarios, without any call to a provider.
-- [portefeuille-modeles-en](portefeuille-modeles-en.html) and its CSV, for the prices and the access routes.
+- [portefeuille-modeles-en](../td3/portefeuille-modeles-en.html) and its CSV, for the prices and the access routes.
 - Your stored TD 1 traces. An optional new experiment uses a separate allocation
   agreed with the instructor and current account allowances.
 
@@ -70,7 +70,7 @@ Exercise the vote:
 
 ```bash
 python3 atelier-vote.py                                   # four synthetic examples, no network
-python3 atelier-vote.py --traces traces-td1.csv --case C02 # the real traces of one question
+python3 atelier-vote.py --traces ../td1/traces-td1.csv --case C02 # the real traces of one question
 ```
 
 The second call takes, for each member of the panel, its last attempt on the

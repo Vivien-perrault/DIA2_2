@@ -1,6 +1,6 @@
 # TD 1 - Comparing models on the same questions
 
-> Final. Pack 2026-10-18-students-1. Set your machine up with [Before TD 1](../before-td1-en.html).
+> Final. Pack 2026-10-18-students-1. Set your machine up with [Before TD 1](../../before-td1-en.html).
 
 **Module: Trustworthy generative AI. Session 1 (21 October), 14:00 to 18:30.**
 
@@ -35,7 +35,7 @@ The `kit-td1` kit, one copy per member, files kept together:
 - the orchestrator skeleton `skeleton-multi-llm-en.py` and its sandbox
   `sandbox_sqlite.py`: common prompt, clients, read-only execution, verdict and
   trace table are provided; the vote is yours to write in TD 2;
-- the portfolio: [portefeuille-modeles-en](portefeuille-modeles-en.html) and its CSV, sixty model and
+- the portfolio: [portefeuille-modeles-en](../td3/portefeuille-modeles-en.html) and its CSV, sixty model and
   access pairs with public index, price and access route;
 - access to the models: your personal Groq Free and OpenRouter accounts. Five
   required models (three Groq, two OpenRouter), exact

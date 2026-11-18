@@ -5,7 +5,7 @@ No network, no key. The panel is fixed to three distinct model families. The
 reference is compared AFTER the decision: the vote never receives it.
 
     python3 atelier-vote.py                                    # four synthetic examples
-    python3 atelier-vote.py --traces traces-td1.csv --case C02  # the real traces of one question
+    python3 atelier-vote.py --traces ../td1/traces-td1.csv --case C02  # the real traces of one question
 """
 import argparse
 import csv
@@ -23,7 +23,10 @@ PANEL = [
 
 
 def load_vote():
-    spec = importlib.util.spec_from_file_location("student_skeleton", Path(__file__).with_name("skeleton-multi-llm-en.py"))
+    # The skeleton lives in the TD 1 kit (../td1); a local copy next to this file takes precedence.
+    local = Path(__file__).with_name("skeleton-multi-llm-en.py")
+    skeleton = local if local.exists() else Path(__file__).resolve().parent.parent / "td1" / "skeleton-multi-llm-en.py"
+    spec = importlib.util.spec_from_file_location("student_skeleton", skeleton)
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
