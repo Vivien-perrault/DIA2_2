@@ -139,3 +139,58 @@ La somme vaut exactement la référence : ces six clients expliquent **tout** l'
 **Vérification indépendante.** La somme de la requête de diagnostic (446 690), qui groupe par client, a été comparée à la valeur de la requête de référence de `reference-td1.csv`, réexécutée sur la base (446 690), puis à la valeur stockée dans le CSV (446 690). Les clients situés aux bornes de la fenêtre ont été vérifiés un par un.
 
 **Lien avec notre lot TD1.** Sur C11, notre lot donne 446 690 (correct) pour gpt-oss-120b, gpt-oss-20b, Qwen et Dots. Seul Cohere ([`openrouter:cohere/north-mini-code:free:C11`](../../td1/traces-td1.csv)) renvoie 0. Sa requête contient `c.birth_date > '2025-12-01'`, qui ne retient que des clients nés dans l'année précédant la date de référence : même famille d'erreur que M2, avec une date de naissance comparée à la date de référence sans retrancher 25 ans. Ce 0 reste **isolé** dans notre lot, ce n'est donc pas un faux consensus. Les quatre bonnes réponses l'emportent en 2 sur 3 comme en 3 sur 5.
+
+### 2.8 Synthèse du livrable
+
+| Élément exigé | Contenu | Où |
+|---|---|---|
+| Identifiant | **C10** : CA HT des commandes passées quand le client avait exactement 25 ans | 2.1 |
+| Source et nature | Lot TD1 de l’équipe, nature `real`, exécuté sur `boutique.sqlite`. DEMO-VOTE est un **exemple construit** (2.0) et DEMO-SQL-C11 un **cas historique rejoué** (2.7). Ces deux cas restent hors des comptes de notre lot. | 2.0, 2.1, 2.7 |
+| Modèles d’accord | `openrouter:cohere/north-mini-code:free` et `groq:qwen/qwen3.8-27b`, tous deux à **119 410 centimes** | 2.1 |
+| Référence indépendante | **558 980 centimes**, [`reference-td1.csv`](../../td1/reference-td1.csv), `checked_by` = Akihito Raffin | 2.1 |
+| Quorum 2 sur 3 (panel fixe) | 119 410, 2 voix : **faux consensus** | 2.2 |
+| Quorum 3 sur 5 (5 modèles TD1) | **Aucun quorum** : 2 voix contre 2, Dots sans vote (`sql_invalid`) | 2.3 |
+| Contre-exemple | C02 : correct en 2 sur 3 (590 320), faux consensus à 0 en 3 sur 5 | 2.2, 2.3 |
+| Cause SQL | Le filtre `WHERE` remplace l’âge révolu par « écart d’années civiles = 25 et anniversaire atteint ». Il oublie les commandes de l’année civile suivante passées avant le 26e anniversaire. La seconde branche de Qwen vise 23 ans et ne sélectionne aucune ligne. | 2.5 |
+| Requêtes complètes | [Cohere](../sql/C10-cohere.sql), [Qwen](../sql/C10-qwen.sql), [référence](../sql/C10-reference.sql) | 2.4 |
+| Requête delta exécutée | [`delta-C10.sql`](../sql/delta-C10.sql) : C004, C005, C007 et C022, soit **439 570 centimes** manquants, 0 ajouté | 2.6 |
+| Vérification indépendante | Calcul Python sur les CSV source (Baptiste), puis relecture croisée complète par script (Akihito) | 2.6, 2.9 |
+| Traces | [`td1/traces-td1.csv`](../../td1/traces-td1.csv), `cell_id` listés en 2.1 | 2.1 |
+
+**Méthode de contrôle qui détecte l’erreur partagée.** Le vote ne la détecte pas : en 2 sur 3, il valide 119 410. Deux contrôles la détectent :
+
+1. **Comparaison à une référence indépendante** écrite et vérifiée par un humain, avec une autre formulation de l’âge (`date(birth_date, '+25 years') <= date(o.date) < date(birth_date, '+26 years')`). L’écart de 439 570 centimes apparaît aussitôt.
+2. **Requête delta par client**, qui localise l’écart. Les quatre clients manqués ont tous des commandes passées entre le 1er janvier et leur 26e anniversaire. Cela désigne la clause fautive sans relire les requêtes.
+
+Un panel élargi (3 sur 5) ne fait que **signaler un doute** sur C10, sans majorité. Ce doute peut déclencher une escalade vers ces contrôles, mais ne donne pas la bonne valeur. Sur C02, le même élargissement **crée** au contraire un faux consensus. Changer de panel est donc un contrôle candidat, pas une garantie.
+
+### 2.9 Relecture croisée
+
+Le script [`td2/sql/relecture.py`](../sql/relecture.py) relance chaque requête et chaque vote des sections 2.0 à 2.7. Il compare chaque résultat au chiffre écrit dans le rapport. La base est ouverte en lecture seule et le vote utilise `vote_k_sur_n` du squelette TD1.
+
+```sh
+python td2/sql/relecture.py
+```
+
+Les **34 contrôles** sont conformes. Ils couvrent :
+
+- DEMO-VOTE : 0 et 100, puis le vote `[0, 0, 100]` qui renvoie 0 avec 2 voix ;
+- les traces : 102 lignes, 100 dernières tentatives, nature `real`, les trois valeurs fausses partagées (C02, C08, C10), les cinq valeurs C10 et les `cell_id` cités ;
+- les références C02, C10 et C11, avec leur `checked_by` ;
+- les quatre votes (C10 et C02, en 2 sur 3 et en 3 sur 5) ;
+- les trois requêtes C10, et la requête de référence relue directement dans le CSV ;
+- les deux branches de Qwen : 14 lignes pour 119 410 centimes, puis 0 ligne ;
+- le delta C10 par client pour chaque modèle (somme 439 570), recalculé aussi en Python sur les CSV sans SQL ;
+- M1, M2, la référence C11 et les six lignes de `delta-C11.sql` (60 lignes de commande, 446 690 centimes), puis les valeurs C11 de notre lot.
+
+**Étiquetage.** La section 2.0 porte la mention « exemple construit » et la section 2.7 la mention « cas historique rejoué ». Ni l’un ni l’autre n’entre dans les comptes de notre lot.
+
+**Point relevé.** La commande `python td2/atelier-vote.py --traces td1/traces-td1.csv --case C10`, citée en 2.2, échoue désormais. Depuis le commit `1967886`, une copie locale `td2/skeleton-multi-llm-en.py` est prioritaire sur le squelette TD1. Cette copie cherche `sandbox_sqlite.py` dans `td2/` et lève `FileNotFoundError`. Les votes de 2.2 et 2.3 restent valables : `relecture.py` les recalcule avec le squelette TD1 et retrouve les mêmes résultats. Pour relancer `atelier-vote.py` tel quel, il faut retirer ou corriger cette copie. Nous la laissons en l’état, car elle appartient à un autre travail.
+
+### 2.10 Contributions à l’étape 2
+
+| Membre | Étapes du plan | Contribution |
+|---|---|---|
+| Nazim Yacine | 1 et 9 | Plan de travail, DEMO-VOTE (script et section 2.0), rejeu de DEMO-SQL-C11 avec les requêtes M1, M2 et `delta-C11.sql` (section 2.7) |
+| Baptiste Marseille | 2 à 8 | Confirmation du cas C10 dans les traces, quorums 2 sur 3 et 3 sur 5, extraction et exécution des requêtes C10, diagnostic du `WHERE`, requête delta et vérification Python sur les CSV (sections 2.1 à 2.6) |
+| Akihito Raffin | 10 à 12 | Synthèse du livrable et méthode de contrôle (2.8), script de relecture croisée et vérification de tous les chiffres (2.9), contributions et commit final (2.10). Auteur de la vérification de la référence C10 au TD1 |

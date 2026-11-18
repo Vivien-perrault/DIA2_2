@@ -64,6 +64,8 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 
 - **DEMO-SQL-C11 rejoué (étape 9)**. M1 et M2 renvoient 0 sur `boutique.sqlite` ; la référence C11 vaut 446690 (`checked_by` = Chandra R S SUKUMAR). M1 teste un seul jour (`birth_date = '2001-12-01'`, aucun client), M2 une fenêtre vide (`<= 2026-12-01` et `>= 2027-12-01`). Fenêtre correcte : `2000-12-02 <= birth_date <= 2001-12-01`. La requête `td2/sql/delta-C11.sql` liste 6 clients (C001, C002, C003, C006, C008, C009) pour 446690 centimes, soit tout l'écart. Dans notre lot, seul Cohere renvoie 0 sur C11 : c'est une erreur isolée, pas un faux consensus. Voir la section 2.7 du rapport.
 
+- **Rédaction terminée (étapes 10 à 12)**. La section 2.8 donne la synthèse du livrable et la méthode de contrôle qui détecte l'erreur partagée : une référence indépendante, puis le delta par client. Le vote 3 sur 5 ne fait que signaler un doute. Le script `td2/sql/relecture.py` relance toutes les requêtes et tous les votes : 34 contrôles conformes (section 2.9). Point ouvert : `td2/atelier-vote.py` échoue depuis le commit 1967886, car la copie `td2/skeleton-multi-llm-en.py` cherche `sandbox_sqlite.py` dans `td2/`. Les votes, recalculés avec le squelette TD1, restent identiques. Contributions en section 2.10.
+
 ## Étapes
 
 ### Partie 0 – Mécanisme (exemple jouet, pas un cas d'analyse)
@@ -105,11 +107,11 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 
 ### Partie E – Rédaction
 
-- [ ] **Étape 10 – Finaliser la section dans `td2/reports/td2.md`**
+- [x] **Étape 10 – Finaliser la section dans `td2/reports/td2.md`** — fait par Akihito le 2026-11-18
   Vérifier que le livrable contient : identifiant, source et nature, modèles d'accord, référence, résultats 2 sur 3 et 3 sur 5, cause SQL, requête delta exécutée avec sa sortie, méthode de vérification indépendante, liens vers les traces et les fichiers SQL.
 
-- [ ] **Étape 11 – Relecture croisée**
+- [x] **Étape 11 – Relecture croisée** — fait par Akihito le 2026-11-18
   Relancer chaque requête citée et vérifier chaque chiffre du rapport. Vérifier que DEMO-VOTE (et C11 s'il est fait) sont bien étiquetés comme exemple construit ou rejoué.
 
-- [ ] **Étape 12 – Contributions et commit final**
+- [x] **Étape 12 – Contributions et commit final** — fait par Akihito le 2026-11-18
   Ajouter la contribution de chaque membre pour l'étape 2 dans le rapport, puis commit et push.
