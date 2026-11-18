@@ -624,26 +624,54 @@ class Orchestrateur:
         families, and look in your traces for a case where several models agree
         on a wrong value.
         """
+        def champ(prop, nom):
+            # un objet (atelier-vote.py construit des SimpleNamespace, le squelette des Trace) ou un dict
+            return prop.get(nom) if isinstance(prop, dict) else getattr(prop, nom, None)
+
+        def centimes(valeur):
+            # une valeur est un nombre entier de centimes : on refuse de tronquer 100.7 en 100,
+            # ce qui fabriquerait un accord avec une vraie valeur de 100
+            if isinstance(valeur, bool):
+                raise ValueError(f"value {valeur!r} is not an integer number of cents")
+            if isinstance(valeur, int):
+                return valeur
+            if isinstance(valeur, float) and valeur.is_integer():
+                return int(valeur)
+            if isinstance(valeur, str) and valeur.strip().lstrip("-").isdigit():
+                return int(valeur.strip())
+            raise ValueError(f"value {valeur!r} is not an integer number of cents")
+
         n = len(traces_question)
-        if not n // 2 < k <= n:
-            raise ValueError("k must be a strict majority of the panel.")
 
-        members = set()
-        models_by_value = {}
-        for proposal in traces_question:
-            member = (proposal.provider, proposal.model_requested)
-            if member in members:
-                raise ValueError(f"Duplicate panel member: {member}")
-            members.add(member)
-            if proposal.verdict == "executed" and proposal.value is not None:
-                models_by_value.setdefault(proposal.value, []).append(":".join(member))
+        # Règle 2 : majorité stricte
+        if not isinstance(k, int) or isinstance(k, bool) or not (n // 2 < k <= n):
+            raise ValueError(f"k={k} is not a strict majority of n={n} (need {n // 2} < k <= {n})")
 
-        value, models = max(models_by_value.items(), key=lambda item: len(item[1]),
-                            default=(None, []))
-        votes = len(models)
-        if votes >= k:
-            return {"consensus": True, "value": value, "votes": votes, "models": models}
-        return {"consensus": False, "value": None, "votes": votes, "models": []}
+        # Règle 3 : un seul vote par couple (provider, model_requested)
+        vus = set()
+        for prop in traces_question:
+            membre = (champ(prop, "provider"), champ(prop, "model_requested"))
+            if membre in vus:
+                raise ValueError(f"duplicate proposal for {membre[0]}:{membre[1]}")
+            vus.add(membre)
+
+        # Règle 1 : seules les propositions exécutées avec une valeur votent
+        votes: dict = {}
+        for prop in traces_question:
+            valeur = champ(prop, "value")
+            if champ(prop, "verdict") != "executed" or valeur is None or valeur == "":
+                continue                      # erreur/indispo : compte dans n, pas de vote
+            valeur = centimes(valeur)
+            votes.setdefault(valeur, []).append(f"{champ(prop, 'provider')}:{champ(prop, 'model_requested')}")
+
+        # Règle 4 : comme k > n/2, une seule valeur au plus peut atteindre k
+        for valeur, modeles in votes.items():
+            if len(modeles) >= k:
+                return {"consensus": True, "value": valeur, "votes": len(modeles), "models": modeles}
+
+        # Règle 5 : pas de consensus, on n'invente rien
+        plus_grand = max((len(m) for m in votes.values()), default=0)
+        return {"consensus": False, "value": None, "votes": plus_grand, "models": []}
 
 
 # ==========================================================================

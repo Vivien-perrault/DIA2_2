@@ -626,8 +626,21 @@ class Orchestrateur:
         on a wrong value.
         """
         def champ(prop, nom):
-            # une proposition peut être un dict (atelier-vote.py) ou un objet Trace
+            # un objet (atelier-vote.py construit des SimpleNamespace, le squelette des Trace) ou un dict
             return prop.get(nom) if isinstance(prop, dict) else getattr(prop, nom, None)
+
+        def centimes(valeur):
+            # une valeur est un nombre entier de centimes : on refuse de tronquer 100.7 en 100,
+            # ce qui fabriquerait un accord avec une vraie valeur de 100
+            if isinstance(valeur, bool):
+                raise ValueError(f"value {valeur!r} is not an integer number of cents")
+            if isinstance(valeur, int):
+                return valeur
+            if isinstance(valeur, float) and valeur.is_integer():
+                return int(valeur)
+            if isinstance(valeur, str) and valeur.strip().lstrip("-").isdigit():
+                return int(valeur.strip())
+            raise ValueError(f"value {valeur!r} is not an integer number of cents")
 
         n = len(traces_question)
 
@@ -649,7 +662,7 @@ class Orchestrateur:
             valeur = champ(prop, "value")
             if champ(prop, "verdict") != "executed" or valeur is None or valeur == "":
                 continue                      # erreur/indispo : compte dans n, pas de vote
-            valeur = int(valeur)
+            valeur = centimes(valeur)
             votes.setdefault(valeur, []).append(f"{champ(prop, 'provider')}:{champ(prop, 'model_requested')}")
 
         # Règle 4 : comme k > n/2, une seule valeur au plus peut atteindre k
