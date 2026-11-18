@@ -77,7 +77,8 @@ HERE = Path(__file__).resolve().parent
 PROTOTYPE = HERE / "prototype-orchestrateur"
 RESOURCES = {
     "access": (HERE / "check_access.py", HERE / "acces-modeles" / "check_access.py"),
-    "sandbox": (HERE / "sandbox_sqlite.py", PROTOTYPE / "sandbox_sqlite.py"),
+    # Third candidate: in this repository the sandbox stays in the TD 1 folder (../td1).
+    "sandbox": (HERE / "sandbox_sqlite.py", PROTOTYPE / "sandbox_sqlite.py", HERE.parent / "td1" / "sandbox_sqlite.py"),
     "schema": (HERE / "schema.sql", PROTOTYPE / "schema.sql"),
     "db": (HERE / "data" / "boutique.sqlite", PROTOTYPE / "data" / "seed-20260925" / "boutique.sqlite"),
     "questions": (HERE / "questions-td1.json", HERE / "kit-td1" / "questions-td1.json"),

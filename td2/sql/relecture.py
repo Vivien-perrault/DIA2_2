@@ -104,6 +104,15 @@ def main():
         check(f"2.2/2.3 {case} vote {k} sur {len(panel)}", (r["consensus"], r["value"], r["votes"]), expected)
     check("2.3 référence C02", int(ref["C02"]["revenue_cents"]), 590320)
 
+    # 2.2 Commande atelier-vote.py citée telle quelle (vote de l'étape 1, copie td2 du squelette)
+    import json, subprocess
+    for case, expected in [("C10", (True, 119410, 2)), ("C02", (True, 590320, 2))]:
+        out = subprocess.run([sys.executable, str(ROOT / "td2" / "atelier-vote.py"), "--traces",
+                              str(ROOT / "td1" / "traces-td1.csv"), "--case", case],
+                             capture_output=True, text=True, cwd=ROOT)
+        d = json.loads(out.stdout)["decision"] if out.returncode == 0 else {}
+        check(f"2.2 atelier-vote.py {case}", (d.get("consensus"), d.get("value"), d.get("votes")), expected)
+
     # 2.4 Requêtes C10
     for name, expected in [("C10-cohere.sql", 119410), ("C10-qwen.sql", 119410), ("C10-reference.sql", 558980)]:
         check(f"2.4 {name}", scalar((SQL / name).read_text(encoding="utf-8")), expected)

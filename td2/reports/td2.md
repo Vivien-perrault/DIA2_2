@@ -52,6 +52,13 @@ python td2/atelier-vote.py --traces td1/traces-td1.csv --case C10
 python td2/atelier-vote.py --traces td1/traces-td1.csv --case C02
 ```
 
+Sortie exécutée (vote `vote_k_sur_n` de l'étape 1, dans `td2/skeleton-multi-llm-en.py`) :
+
+```json
+{"case": "C10", "nature": "real", "n": 3, "k": 2, "decision": {"consensus": true, "value": 119410, "votes": 2, "models": ["openrouter:cohere/north-mini-code:free", "groq:qwen/qwen3.8-27b"]}, "reference": 558980, "matches_reference": false}
+{"case": "C02", "nature": "real", "n": 3, "k": 2, "decision": {"consensus": true, "value": 590320, "votes": 2, "models": ["groq:openai/gpt-oss-120b", "groq:qwen/qwen3.8-27b"]}, "reference": 590320, "matches_reference": true}
+```
+
 Pour C10, Cohere et Qwen votent pour 119 410 centimes et gpt-oss-120b vote pour 558 980. Le quorum donne 119 410 avec deux voix, un faux consensus. Pour C02, gpt-oss-120b et Qwen votent pour 590 320 centimes et Cohere vote pour 0. Le quorum donne 590 320 avec deux voix, conformément à la référence.
 
 ### 2.3 Quorum de 3 sur 5
@@ -75,6 +82,40 @@ Les requêtes complètes ont été extraites de la dernière tentative de chaque
 | [Qwen 3.8-27B](../sql/C10-qwen.sql) | 119 410 |
 | [Référence C10](../sql/C10-reference.sql) | 558 980 |
 
+Requête Cohere North Mini Code (`openrouter:cohere/north-mini-code:free:C10`), telle que renvoyée par le modèle :
+
+```sql
+SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN product p ON o.product_id = p.product_id
+WHERE CAST(strftime('%Y', o.date) - strftime('%Y', c.birth_date) AS INTEGER) = 25
+  AND CAST(strftime('%m-%d', o.date) >= CAST(strftime('%m-%d', c.birth_date) AS TEXT) AS INTEGER) = 1;
+```
+
+Requête Qwen 3.8-27B (`groq:qwen/qwen3.8-27b:C10`), telle que renvoyée par le modèle :
+
+```sql
+SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN product p ON o.product_id = p.product_id
+WHERE (
+    (strftime('%Y', o.date) - strftime('%Y', c.birth_date)) = 25
+    AND (strftime('%m', o.date) || strftime('%d', o.date)) >= (strftime('%m', c.birth_date) || strftime('%d', c.birth_date))
+)
+OR (
+    (strftime('%Y', o.date) - strftime('%Y', c.birth_date)) = 24
+    AND (strftime('%m', o.date) || strftime('%d', o.date)) < (strftime('%m', c.birth_date) || strftime('%d', c.birth_date))
+);
+```
+
+Requête de référence C10 (`td1/reference-td1.csv`) :
+
+```sql
+SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents FROM orders o JOIN product p ON o.product_id = p.product_id JOIN customers c ON o.customer_id = c.customer_id WHERE date(c.birth_date, '+25 years') <= date(o.date) AND date(c.birth_date, '+26 years') > date(o.date)
+```
+
 ### 2.5 Diagnostic de la clause WHERE
 
 C10 demande le chiffre d’affaires HT des commandes passées quand le client avait exactement 25 ans. Les trois requêtes additionnent `o.quantity_product * p.price` et font les mêmes jointures internes sur `customer_id` et `product_id`. La référence filtre par date de commande, du 25e anniversaire inclus au 26e anniversaire exclu, avec `date(c.birth_date, '+25 years') <= date(o.date)` et `date(o.date) < date(c.birth_date, '+26 years')`.
@@ -86,7 +127,50 @@ Les deux modèles omettent donc la même période. Qwen ajoute un filtre qui pou
 
 ### 2.6 Delta par client et vérification indépendante
 
-La [requête delta C10](../sql/delta-C10.sql) a été exécutée sur `boutique.sqlite` ouverte en lecture seule. Elle compare, pour chaque ligne de commande, le filtre de la référence aux filtres de Cohere et de Qwen, puis cumule le CA HT manquant et ajouté par client. Le delta soustrait le CA HT ajouté au CA HT manquant. Les deux modèles donnent la même sortie par client.
+La [requête delta C10](../sql/delta-C10.sql) a été exécutée sur `boutique.sqlite` ouverte en lecture seule. Elle compare, pour chaque ligne de commande, le filtre de la référence aux filtres de Cohere et de Qwen, puis cumule le CA HT manquant et ajouté par client. Le delta soustrait le CA HT ajouté au CA HT manquant. Les deux modèles donnent la même sortie par client. Dans la CTE `classified`, `in_cohere` et `in_qwen` reprennent la condition `WHERE` de chaque modèle : écart d'années civiles et comparaison du mois-jour. La comparaison `'%m-%d'` donne le même ordre que la concaténation `MMDD` de Qwen. `in_reference` reprend la condition de la référence.
+
+```sql
+WITH order_lines AS (
+    SELECT o.customer_id,
+           o.quantity_product * p.price AS revenue_cents,
+           date(o.date) AS order_date, c.birth_date,
+           strftime('%Y', o.date) - strftime('%Y', c.birth_date) AS year_gap,
+           strftime('%m-%d', o.date) >= strftime('%m-%d', c.birth_date)
+               AS birthday_reached
+    FROM orders o
+    JOIN customers c ON o.customer_id = c.customer_id
+    JOIN product p ON o.product_id = p.product_id
+),
+classified AS (
+    SELECT *,
+           date(birth_date, '+25 years') <= order_date
+               AND order_date < date(birth_date, '+26 years') AS in_reference,
+           year_gap = 25 AND birthday_reached AS in_cohere,
+           (year_gap = 25 AND birthday_reached)
+               OR (year_gap = 24 AND NOT birthday_reached) AS in_qwen
+    FROM order_lines
+),
+delta_lines AS (
+    SELECT customer_id, 'Cohere' AS model,
+           (in_reference - in_cohere) * revenue_cents AS delta_cents
+    FROM classified
+    WHERE in_reference <> in_cohere
+    UNION ALL
+    SELECT customer_id, 'Qwen' AS model,
+           (in_reference - in_qwen) * revenue_cents AS delta_cents
+    FROM classified
+    WHERE in_reference <> in_qwen
+)
+SELECT model, customer_id,
+       SUM(CASE WHEN delta_cents > 0 THEN delta_cents ELSE 0 END) AS missing_cents,
+       -SUM(CASE WHEN delta_cents < 0 THEN delta_cents ELSE 0 END) AS extra_cents,
+       SUM(delta_cents) AS delta_cents
+FROM delta_lines
+GROUP BY model, customer_id
+ORDER BY model, customer_id;
+```
+
+Sortie (identique pour `model = 'Cohere'` et `model = 'Qwen'`) :
 
 | `customer_id` | CA HT manquant (centimes) | CA HT ajouté (centimes) | Delta (centimes) |
 |---|---:|---:|---:|
@@ -112,6 +196,27 @@ Baptiste a vérifié le résultat en Python sur les [trois CSV source](../../td1
 | [M2](../sql/C11-M2-cohere.sql) | cohere/north-mini-code:free (OpenRouter) | **0** |
 | Référence C11 ([`reference-td1.csv`](../../td1/reference-td1.csv), `checked_by` = Chandra R S SUKUMAR) | — | **446 690** |
 
+```sql
+-- DEMO-SQL-C11, cas historique rejoué (lot pilote de septembre 2026, pas notre lot TD1)
+-- Requête M1, openai/gpt-oss-20b (Groq), telle que fournie dans l'énoncé TD2
+SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN product p ON o.product_id = p.product_id
+WHERE c.birth_date = '2001-12-01';
+```
+
+```sql
+-- DEMO-SQL-C11, cas historique rejoué (lot pilote de septembre 2026, pas notre lot TD1)
+-- Requête M2, cohere/north-mini-code:free (OpenRouter), telle que fournie dans l'énoncé TD2
+SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+JOIN product p ON o.product_id = p.product_id
+WHERE CAST(strftime('%Y-%m-%d', '2026-12-01') AS TEXT) >= c.birth_date
+  AND CAST(strftime('%Y-%m-%d', '2026-12-01', '+1 year') AS TEXT) <= c.birth_date;
+```
+
 Les deux modèles s'accordent sur la même valeur fausse, 0. Avec deux propositions identiques, un vote 2 sur 3 les validerait si le troisième membre du panel répondait autrement. L'écart à expliquer est de **446 690 − 0 = 446 690 centimes**.
 
 **Fenêtre requise.** Avoir exactement 25 ans au 2026-12-01, c'est avoir passé son 25e anniversaire sans avoir encore atteint le 26e, soit `date(birth_date, '+25 years') <= '2026-12-01' < date(birth_date, '+26 years')`. Cela correspond à **`'2000-12-02' <= birth_date <= '2001-12-01'`**, une fenêtre d'un an. La référence applique exactement cette condition.
@@ -123,6 +228,27 @@ Les deux modèles s'accordent sur la même valeur fausse, 0. Avec deux propositi
 Les deux erreurs sont **différentes** : un seul jour pour M1, une fenêtre vide pour M2. Elles produisent pourtant la même valeur, parce que toute fenêtre qui ne contient aucun client donne 0 avec `COALESCE`. L'accord sur 0 ne prouve donc pas une cause commune. C'est la valeur par défaut de deux filtres faux.
 
 **Requête de diagnostic** ([`delta-C11.sql`](../sql/delta-C11.sql)), exécutée sur `boutique.sqlite`. Elle liste les clients âgés de 25 ans au 2026-12-01 et le CA HT de leurs commandes. Les colonnes `counted_by_m1` et `counted_by_m2` rejouent les filtres de M1 et de M2 sur chaque client.
+
+```sql
+-- DEMO-SQL-C11 : clients âgés d'exactement 25 ans au 2026-12-01 et CA HT de toutes leurs commandes.
+-- Fenêtre requise : 25e anniversaire <= 2026-12-01 < 26e anniversaire,
+-- soit 2000-12-02 <= birth_date <= 2001-12-01.
+-- M1 et M2 renvoient 0 : chaque ligne ci-dessous est donc manquée par les deux,
+-- et la somme de la colonne revenue_cents doit égaler la référence C11 (446690).
+SELECT c.customer_id,
+       c.birth_date,
+       COUNT(*) AS order_lines,
+       SUM(o.quantity_product * p.price) AS revenue_cents,
+       (c.birth_date = '2001-12-01') AS counted_by_m1,
+       ('2026-12-01' >= c.birth_date AND '2027-12-01' <= c.birth_date) AS counted_by_m2
+FROM customers c
+JOIN orders o ON o.customer_id = c.customer_id
+JOIN product p ON p.product_id = o.product_id
+WHERE date(c.birth_date, '+25 years') <= '2026-12-01'
+  AND date(c.birth_date, '+26 years') >  '2026-12-01'
+GROUP BY c.customer_id, c.birth_date
+ORDER BY c.customer_id;
+```
 
 | `customer_id` | `birth_date` | Lignes de commande | CA HT (centimes) | Compté par M1 | Compté par M2 |
 |---|---|---:|---:|:-:|:-:|
@@ -172,7 +298,7 @@ Le script [`td2/sql/relecture.py`](../sql/relecture.py) relance chaque requête 
 python td2/sql/relecture.py
 ```
 
-Les **34 contrôles** sont conformes. Ils couvrent :
+Les **36 contrôles** sont conformes. Ils couvrent :
 
 - DEMO-VOTE : 0 et 100, puis le vote `[0, 0, 100]` qui renvoie 0 avec 2 voix ;
 - les traces : 102 lignes, 100 dernières tentatives, nature `real`, les trois valeurs fausses partagées (C02, C08, C10), les cinq valeurs C10 et les `cell_id` cités ;
@@ -181,16 +307,17 @@ Les **34 contrôles** sont conformes. Ils couvrent :
 - les trois requêtes C10, et la requête de référence relue directement dans le CSV ;
 - les deux branches de Qwen : 14 lignes pour 119 410 centimes, puis 0 ligne ;
 - le delta C10 par client pour chaque modèle (somme 439 570), recalculé aussi en Python sur les CSV sans SQL ;
+- la commande `atelier-vote.py` citée en 2.2, relancée telle quelle sur C10 et C02 ;
 - M1, M2, la référence C11 et les six lignes de `delta-C11.sql` (60 lignes de commande, 446 690 centimes), puis les valeurs C11 de notre lot.
 
 **Étiquetage.** La section 2.0 porte la mention « exemple construit » et la section 2.7 la mention « cas historique rejoué ». Ni l’un ni l’autre n’entre dans les comptes de notre lot.
 
-**Point relevé.** La commande `python td2/atelier-vote.py --traces td1/traces-td1.csv --case C10`, citée en 2.2, échoue désormais. Depuis le commit `1967886`, une copie locale `td2/skeleton-multi-llm-en.py` est prioritaire sur le squelette TD1. Cette copie cherche `sandbox_sqlite.py` dans `td2/` et lève `FileNotFoundError`. Les votes de 2.2 et 2.3 restent valables : `relecture.py` les recalcule avec le squelette TD1 et retrouve les mêmes résultats. Pour relancer `atelier-vote.py` tel quel, il faut retirer ou corriger cette copie. Nous la laissons en l’état, car elle appartient à un autre travail.
+**Point relevé et corrigé.** La commande `python td2/atelier-vote.py --traces td1/traces-td1.csv --case C10`, citée en 2.2, échouait. La copie locale `td2/skeleton-multi-llm-en.py` (commit `1967886`, étape 1) a priorité sur le squelette TD1, et elle cherchait `sandbox_sqlite.py` seulement dans `td2/`, d'où un `FileNotFoundError`. Un troisième emplacement, `../td1/sandbox_sqlite.py`, a été ajouté à `RESOURCES["sandbox"]`. La commande relancée avec le `vote_k_sur_n` de l'étape 1 redonne les sorties de 2.2. `relecture.py` vérifie ce résultat.
 
 ### 2.10 Contributions à l’étape 2
 
 | Membre | Étapes du plan | Contribution |
 |---|---|---|
-| Nazim Yacine | 1 et 9 | Plan de travail, DEMO-VOTE (script et section 2.0), rejeu de DEMO-SQL-C11 avec les requêtes M1, M2 et `delta-C11.sql` (section 2.7) |
+| Nazim Yacine | 1 et 9 | Plan de travail, DEMO-VOTE (script et section 2.0), rejeu de DEMO-SQL-C11 avec les requêtes M1, M2 et `delta-C11.sql` (section 2.7). Après la relecture : correction du chemin `sandbox_sqlite.py` pour relancer `atelier-vote.py`, et ajout des requêtes complètes dans le rapport (2.2, 2.4, 2.6, 2.7, 2.9) |
 | Baptiste Marseille | 2 à 8 | Confirmation du cas C10 dans les traces, quorums 2 sur 3 et 3 sur 5, extraction et exécution des requêtes C10, diagnostic du `WHERE`, requête delta et vérification Python sur les CSV (sections 2.1 à 2.6) |
 | Akihito Raffin | 10 à 12 | Synthèse du livrable et méthode de contrôle (2.8), script de relecture croisée et vérification de tous les chiffres (2.9), contributions et commit final (2.10). Auteur de la vérification de la référence C10 au TD1 |
