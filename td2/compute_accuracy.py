@@ -9,41 +9,46 @@ TRACES_FILE = os.path.join(PARENT_DIR, "td1", "traces-td1.csv")
 if not os.path.exists(TRACES_FILE):
     TRACES_FILE = os.path.join(CURRENT_DIR, "traces-td1.csv")
 
+# Familles selon le champ "type" de td1/questions-td1.json (mêmes familles que five-model-summary-en.csv)
 QUESTION_FAMILIES = {
-    "C01": "F1_period", "C05": "F1_period", "C09": "F1_period", "C12": "F1_period",
-    "C02": "F2_age_fixed_date", "C06": "F2_age_fixed_date", "C11": "F2_age_fixed_date", "C15": "F2_age_fixed_date",
-    "C03": "F2b_age_at_order", "C07": "F2b_age_at_order", "C10": "F2b_age_at_order", "C14": "F2b_age_at_order",
-    "C04": "F3_product_list", "C08": "F3_product_list", "C13": "F3_product_list", "C16": "F3_product_list",
-    "C17": "F4_combined", "C18": "F4_combined", "C19": "F4_combined", "C20": "F4_combined",
+    "C01": "F1_period", "C04": "F1_period", "C05": "F1_period", "C06": "F1_period", "C07": "F1_period", "C20": "F1_period",
+    "C02": "F2_age_fixed_date", "C08": "F2_age_fixed_date", "C09": "F2_age_fixed_date", "C11": "F2_age_fixed_date",
+    "C10": "F2b_age_at_order",
+    "C03": "F3_product_list", "C12": "F3_product_list", "C13": "F3_product_list", "C14": "F3_product_list",
+    "C15": "F4_combined", "C16": "F4_combined", "C17": "F4_combined", "C18": "F4_combined", "C19": "F4_combined",
 }
 
 def compute_accuracy(traces_file):
     stats = defaultdict(lambda: defaultdict(lambda: {"correct": 0, "total": 0, "cases": []}))
 
-    with open(traces_file, mode="r", encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            model = row.get("model_requested", "unknown").strip()
-            case_id = row.get("case_id", "").strip()
-            verdict = row.get("verdict", "").strip()
-            
-            raw_val = row.get("value", "").strip()
-            raw_ref = row.get("reference", "").strip()
-            
-            try:
-                val = float(raw_val) if raw_val else None
-                ref = float(raw_ref) if raw_ref else None
-            except ValueError:
-                val, ref = None, None
-            
-            family = QUESTION_FAMILIES.get(case_id, "Unknown")
-            
-            stats[model][family]["total"] += 1
-            stats[model][family]["cases"].append(case_id)
-            
-            # Une réponse est correcte si le verdict est 'correct' ou si les valeurs correspondent
-            if verdict == "correct" or (val is not None and ref is not None and val == ref):
-                stats[model][family]["correct"] += 1
+    # Seule la dernière tentative de chaque (modèle, question) compte, comme dans le TD 1
+    last = {}
+    with open(traces_file, mode="r", encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            key = (row.get("model_requested", "unknown").strip(), row.get("case_id", "").strip())
+            if key not in last or int(row.get("attempts") or 1) >= int(last[key].get("attempts") or 1):
+                last[key] = row
+
+    for (model, case_id), row in last.items():
+        verdict = row.get("verdict", "").strip()
+
+        raw_val = row.get("value", "").strip()
+        raw_ref = row.get("reference", "").strip()
+
+        try:
+            val = float(raw_val) if raw_val else None
+            ref = float(raw_ref) if raw_ref else None
+        except ValueError:
+            val, ref = None, None
+
+        family = QUESTION_FAMILIES.get(case_id, "Unknown")
+
+        stats[model][family]["total"] += 1
+        stats[model][family]["cases"].append(case_id)
+
+        # Une réponse est correcte si le verdict est 'correct' ou si les valeurs correspondent
+        if verdict == "correct" or (val is not None and ref is not None and val == ref):
+            stats[model][family]["correct"] += 1
 
     return stats
 
