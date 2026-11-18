@@ -87,5 +87,4 @@ The replay re-executes the stored SQL offline and gives the same verdicts as the
 ## Open points
 
 - Batches B and E were checked by their own operators: an independent review by another member is still to do.
-- `prompts/prompt-td1.md` duplicates `prompts-en.md` (identical content); one copy should be removed.
 - TD 2 uses these traces: see [../td2/](../td2/).

@@ -27,7 +27,7 @@
 
 | Folder | Content |
 |---|---|
-| [`td1/`](td1/) | Runnable kit (code, `data/`, schema, questions, authorised models, protocol and environment guide) + TD 1 statement and deliverables (references, traces, comparisons, `verif/`, `sql/`, `prompts/`, `reports/td1.md`). |
+| [`td1/`](td1/) | Runnable kit (code, `data/`, schema, questions, authorised models, protocol and environment guide) + TD 1 statement and deliverables (references, traces, comparisons, `verif/`, `sql/`, `prompts-en.md`, `reports/td1.md`). |
 | [`td2/`](td2/) | TD 2 statement, `atelier-vote.py` (loads `../td1/skeleton-multi-llm-en.py`), `atelier-routage.py`. |
 | [`td3/`](td3/) | TD 3 statement, cost method (`methode-cout-en`), model portfolio (`portefeuille-modeles-en` + CSV). |
 

@@ -1,6 +1,6 @@
 # Prompt used in TD 1
 
-The prompt is the one in `skeleton-multi-llm-en.py` (`SYSTEM_PROMPT`, `USER_PROMPT_TEMPLATE`), **unchanged from the kit**: the file's SHA-256 matches `manifest.json`. It was identical for all five models. `{schema}` is replaced by the content of [`schema.sql`](../schema.sql), and `{question}` by the text of the question in `questions-td1.json`.
+The prompt is the one in `skeleton-multi-llm-en.py` (`SYSTEM_PROMPT`, `USER_PROMPT_TEMPLATE`), **unchanged from the kit**: the `SYSTEM_PROMPT` and `USER_PROMPT_TEMPLATE` block is identical to the kit version (the file's SHA-256 matched `manifest.json` during TD 1; it no longer does since `vote_k_sur_n` was added for TD 2, outside the prompt). It was identical for all five models. `{schema}` is replaced by the content of [`schema.sql`](schema.sql), and `{question}` by the text of the question in `questions-td1.json`.
 
 The fingerprint `prompt_sha256` in each trace is the SHA-256 of `SYSTEM_PROMPT + "\n" + user message`. There is one fingerprint per question, the same for all five models (20 distinct fingerprints in `traces-td1.csv`). We recomputed the 20 fingerprints from this text, `schema.sql` and `questions-td1.json`: all 20 match the traces.
 

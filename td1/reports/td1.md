@@ -29,7 +29,7 @@ Latency is the median over the HTTP 200 calls in `traces-td1.csv`.
 | 3. Comparison CSV | Done: 100 rows, one final result per cell | [`model-question-comparison-en.csv`](../model-question-comparison-en.csv) |
 | 3. Five-model summary | Done | [`five-model-summary-en.csv`](../five-model-summary-en.csv) |
 | 3. Verification notes | Done for all five batches: checks, offline replay and cause of each failure, checked on the database | [`verif/`](../verif/): `verification-A.md` ... `verification-E.md` and `comparison-A.csv` ... `comparison-E.csv` |
-| Prompt | Unchanged from the kit; the 20 fingerprints recomputed from it match the traces | [`prompts/prompt-td1.md`](../prompts/prompt-td1.md), verbatim copy of `SYSTEM_PROMPT` and `USER_PROMPT_TEMPLATE` from [`skeleton-multi-llm-en.py`](../skeleton-multi-llm-en.py) |
+| Prompt | Unchanged from the kit; the 20 fingerprints recomputed from it match the traces | [`prompts-en.md`](../prompts-en.md), verbatim copy of `SYSTEM_PROMPT` and `USER_PROMPT_TEMPLATE` from [`skeleton-multi-llm-en.py`](../skeleton-multi-llm-en.py) |
 
 Consistency checks run for this report (scripted, on the committed files):
 
