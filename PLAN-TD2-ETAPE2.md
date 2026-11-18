@@ -56,6 +56,8 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 
 - **Confirmation dans les traces (étape 2)**. Les 102 lignes donnent 100 dernières tentatives distinctes sur 20 questions et 5 modèles. C02, C08 et C10 sont les seuls cas avec une valeur incorrecte partagée. C10 est retenu. Sa référence indépendante est de 558980 centimes (`checked_by` = Akihito Raffin). Les cinq `cell_id` figurent dans la section 2.1 du rapport.
 
+- **Quorums confirmés par exécution (étapes 3 et 4)**. C10 donne un faux consensus à 119410 centimes en 2 sur 3, puis aucun quorum en 3 sur 5 (2 voix à 119410, 2 à 558980, Dots sans vote). C02 donne le résultat correct de 590320 centimes en 2 sur 3, puis un faux consensus à 0 en 3 sur 5. Voir les sections 2.2 et 2.3 du rapport.
+
 ## Étapes
 
 ### Partie 0 – Mécanisme (exemple jouet, pas un cas d'analyse)
@@ -68,10 +70,10 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 - [x] **Étape 2 – Confirmer le cas dans les traces** — fait par Baptiste le 2026-11-18
   Relire `td1/traces-td1.csv` sur les 5 modèles (dernière tentative par modèle) et vérifier le tableau des « Résultats déjà acquis ». Valider C10 comme cas principal, ou argumenter un autre choix. Noter dans le rapport (section 2.1) : identifiant, modèles d'accord, valeur fausse, référence (`td1/reference-td1.csv`, colonne `checked_by` comprise), nature `real` (exécuté pendant notre TD1). Ajouter les `cell_id` concernés.
 
-- [ ] **Étape 3 – Quorum 2 sur 3 (panel fixe)**
+- [x] **Étape 3 – Quorum 2 sur 3 (panel fixe)** — fait par Baptiste le 2026-11-18
   Déclarer n = 3 (les 3 modèles de `td2/atelier-vote.py`) et k = 2. Lancer `python td2/atelier-vote.py`, ou appeler `vote_k_sur_n` sur C10 (et C02). Noter consensus, valeur et votes, puis comparer à la référence.
 
-- [ ] **Étape 4 – Quorum 3 sur 5 (les 5 modèles TD1)**
+- [x] **Étape 4 – Quorum 3 sur 5 (les 5 modèles TD1)** — fait par Baptiste le 2026-11-18
   Déclarer n = 5 et k = 3. Une cellule `sql_invalid` ou une valeur vide ne compte pas comme un vote. Pour C10 et C02 : la valeur fausse gagne-t-elle, est-elle mise en minorité, ou n'y a-t-il pas de quorum ? Tableau récapitulatif `question | 2 sur 3 | 3 sur 5 | référence` dans le rapport.
 
 ### Partie B – Diagnostic de la clause SQL fautive

@@ -624,7 +624,26 @@ class Orchestrateur:
         families, and look in your traces for a case where several models agree
         on a wrong value.
         """
-        raise NotImplementedError("vote_k_sur_n: to implement in TD 2 (see the procedure in the docstring).")
+        n = len(traces_question)
+        if not n // 2 < k <= n:
+            raise ValueError("k must be a strict majority of the panel.")
+
+        members = set()
+        models_by_value = {}
+        for proposal in traces_question:
+            member = (proposal.provider, proposal.model_requested)
+            if member in members:
+                raise ValueError(f"Duplicate panel member: {member}")
+            members.add(member)
+            if proposal.verdict == "executed" and proposal.value is not None:
+                models_by_value.setdefault(proposal.value, []).append(":".join(member))
+
+        value, models = max(models_by_value.items(), key=lambda item: len(item[1]),
+                            default=(None, []))
+        votes = len(models)
+        if votes >= k:
+            return {"consensus": True, "value": value, "votes": votes, "models": models}
+        return {"consensus": False, "value": None, "votes": votes, "models": []}
 
 
 # ==========================================================================
