@@ -62,6 +62,8 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 
 - **Delta vérifié (étapes 7 et 8)**. Pour chaque modèle, les mêmes quatre clients expliquent les 439570 centimes manquants : C004 (150260), C005 (150240), C007 (118740) et C022 (20330). Aucun CA HT n’a été ajouté à tort. Baptiste a confirmé les montants par un calcul Python sur les trois CSV source. Voir le [SQL](td2/sql/delta-C10.sql) et la section 2.6 du rapport.
 
+- **DEMO-SQL-C11 rejoué (étape 9)**. M1 et M2 renvoient 0 sur `boutique.sqlite` ; la référence C11 vaut 446690 (`checked_by` = Chandra R S SUKUMAR). M1 teste un seul jour (`birth_date = '2001-12-01'`, aucun client), M2 une fenêtre vide (`<= 2026-12-01` et `>= 2027-12-01`). Fenêtre correcte : `2000-12-02 <= birth_date <= 2001-12-01`. La requête `td2/sql/delta-C11.sql` liste 6 clients (C001, C002, C003, C006, C008, C009) pour 446690 centimes, soit tout l'écart. Dans notre lot, seul Cohere renvoie 0 sur C11 : c'est une erreur isolée, pas un faux consensus. Voir la section 2.7 du rapport.
+
 ## Étapes
 
 ### Partie 0 – Mécanisme (exemple jouet, pas un cas d'analyse)
@@ -98,7 +100,7 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 
 ### Partie D – Cas historique DEMO-SQL-C11 (facultatif)
 
-- [ ] **Étape 9 – C11 en complément**
+- [x] **Étape 9 – C11 en complément** — fait par Nazim le 2026-11-18
   Exécuter M1 et M2 (texte complet dans `td2/enonce-td2-en.md`) : les deux renvoient 0. M1 teste seulement `birth_date = '2001-12-01'`. M2 exige `birth_date <= '2026-12-01'` **et** `birth_date >= '2027-12-01'`, une fenêtre vide. La fenêtre correcte pour « exactement 25 ans au 2026-12-01 » est `'2000-12-02' <= birth_date <= '2001-12-01'`. Écrire la requête qui liste ces clients et leur CA ; la somme doit égaler notre référence C11. Le marquer comme **cas historique rejoué**.
 
 ### Partie E – Rédaction

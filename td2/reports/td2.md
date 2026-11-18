@@ -99,3 +99,43 @@ La [requête delta C10](../sql/delta-C10.sql) a été exécutée sur `boutique.s
 Pour chaque modèle, la somme des deltas vaut exactement **558 980 − 119 410 = 439 570 centimes**.
 
 Baptiste a vérifié le résultat en Python sur les [trois CSV source](../../td1/data) `orders.csv`, `customers.csv` et `product.csv`. Pour chaque ligne, il a calculé l’âge révolu comme l’écart entre les années civiles diminué d’un an si la commande précède l’anniversaire dans l’année, puis multiplié la quantité par le prix unitaire. Le calcul retient les clients de 25 ans pour la référence, le sous-ensemble dont l’écart d’années est 25 pour Cohere, et ajoute à ce sous-ensemble les clients de 23 ans dont l’écart d’années est 24 pour Qwen. Il retrouve les trois totaux et les quatre deltas par client pour chacun des modèles.
+
+### 2.7 Cas historique rejoué : DEMO-SQL-C11 (complément)
+
+> **Nature : cas historique rejoué.** Les requêtes M1 et M2 viennent du lot pilote de septembre 2026 et sont reproduites telles que l'énoncé TD2 les donne. Ce ne sont **pas** des traces de notre lot TD1. On les a seulement réexécutées sur `td1/data/boutique.sqlite`, ouverte en lecture seule. Notre cas principal reste C10.
+
+**Question C11** : CA HT, en centimes, de toutes les commandes des clients âgés d'**exactement 25 ans** à la date de référence 2026-12-01.
+
+| Requête | Modèle d'origine | Résultat (centimes) |
+|---|---|---:|
+| [M1](../sql/C11-M1-gpt-oss-20b.sql) | openai/gpt-oss-20b (Groq) | **0** |
+| [M2](../sql/C11-M2-cohere.sql) | cohere/north-mini-code:free (OpenRouter) | **0** |
+| Référence C11 ([`reference-td1.csv`](../../td1/reference-td1.csv), `checked_by` = Chandra R S SUKUMAR) | — | **446 690** |
+
+Les deux modèles s'accordent sur la même valeur fausse, 0. Avec deux propositions identiques, un vote 2 sur 3 les validerait si le troisième membre du panel répondait autrement. L'écart à expliquer est de **446 690 − 0 = 446 690 centimes**.
+
+**Fenêtre requise.** Avoir exactement 25 ans au 2026-12-01, c'est avoir passé son 25e anniversaire sans avoir encore atteint le 26e, soit `date(birth_date, '+25 years') <= '2026-12-01' < date(birth_date, '+26 years')`. Cela correspond à **`'2000-12-02' <= birth_date <= '2001-12-01'`**, une fenêtre d'un an. La référence applique exactement cette condition.
+
+**Fenêtre testée par M1.** `c.birth_date = '2001-12-01'` ne retient que les clients dont le 25e anniversaire tombe **le jour même** de la date de référence. La fenêtre d'un an est réduite à un seul jour. Aucun client de la base n'est né le 2001-12-01, d'où 0 ligne. `COALESCE` transforme ensuite le `NULL` de `SUM` en un 0 qui ne signale rien d'anormal.
+
+**Fenêtre testée par M2.** Les deux conditions se réduisent à `birth_date <= '2026-12-01'` **et** `birth_date >= '2027-12-01'`, qui sont contradictoires : la fenêtre est **vide**, quelles que soient les données. M2 compare la date de naissance directement à la date de référence, sans retrancher 25 ans. Le `+1 year` déplace en plus la seconde borne dans le mauvais sens. Les `CAST(strftime(...))` ne changent rien, puisque les dates sont déjà au format texte `YYYY-MM-DD`.
+
+Les deux erreurs sont **différentes** : un seul jour pour M1, une fenêtre vide pour M2. Elles produisent pourtant la même valeur, parce que toute fenêtre qui ne contient aucun client donne 0 avec `COALESCE`. L'accord sur 0 ne prouve donc pas une cause commune. C'est la valeur par défaut de deux filtres faux.
+
+**Requête de diagnostic** ([`delta-C11.sql`](../sql/delta-C11.sql)), exécutée sur `boutique.sqlite`. Elle liste les clients âgés de 25 ans au 2026-12-01 et le CA HT de leurs commandes. Les colonnes `counted_by_m1` et `counted_by_m2` rejouent les filtres de M1 et de M2 sur chaque client.
+
+| `customer_id` | `birth_date` | Lignes de commande | CA HT (centimes) | Compté par M1 | Compté par M2 |
+|---|---|---:|---:|:-:|:-:|
+| C001 | 2001-09-25 | 18 | 135 000 | 0 | 0 |
+| C002 | 2001-09-24 | 6 | 25 920 | 0 | 0 |
+| C003 | 2001-09-26 | 6 | 47 900 | 0 | 0 |
+| C006 | 2001-11-30 | 10 | 77 450 | 0 | 0 |
+| C008 | 2001-05-15 | 11 | 99 090 | 0 | 0 |
+| C009 | 2001-03-10 | 9 | 61 330 | 0 | 0 |
+| **Total** | | **60** | **446 690** | | |
+
+La somme vaut exactement la référence : ces six clients expliquent **tout** l'écart avec 0. Aucun d'eux n'est retenu par M1 ni par M2, et aucun client n'est ajouté à tort. Bornes de la fenêtre : C007 (né le 2000-11-30) a eu 26 ans le 2026-11-30 et est **exclu** à raison. C006 (né le 2001-11-30) a eu 25 ans le même jour et est **inclus**. C014 (né le 2001-12-08) n'aura 25 ans qu'après la date de référence.
+
+**Vérification indépendante.** La somme de la requête de diagnostic (446 690), qui groupe par client, a été comparée à la valeur de la requête de référence de `reference-td1.csv`, réexécutée sur la base (446 690), puis à la valeur stockée dans le CSV (446 690). Les clients situés aux bornes de la fenêtre ont été vérifiés un par un.
+
+**Lien avec notre lot TD1.** Sur C11, notre lot donne 446 690 (correct) pour gpt-oss-120b, gpt-oss-20b, Qwen et Dots. Seul Cohere ([`openrouter:cohere/north-mini-code:free:C11`](../../td1/traces-td1.csv)) renvoie 0. Sa requête contient `c.birth_date > '2025-12-01'`, qui ne retient que des clients nés dans l'année précédant la date de référence : même famille d'erreur que M2, avec une date de naissance comparée à la date de référence sans retrancher 25 ans. Ce 0 reste **isolé** dans notre lot, ce n'est donc pas un faux consensus. Les quatre bonnes réponses l'emportent en 2 sur 3 comme en 3 sur 5.
