@@ -1,5 +1,24 @@
 # TD 2 – Rapport
 
+Sous-groupe **DIA2_2**, séance 2 du 18 novembre 2026. Aucun nouvel appel réseau : tout le TD 2 repose sur les traces réelles du TD 1 ([`traces-td1.csv`](../../td1/traces-td1.csv), 102 appels, 5 modèles × 20 questions). Vue d'ensemble des livrables et commandes : [`td2/README.md`](../README.md).
+
+## Résumé
+
+| Livrable | Résultat | Où |
+|---|---|---|
+| Vote k sur n | `vote_k_sur_n` complété, une seule implémentation dans `td1/` et `td2/` | [`skeleton-multi-llm-en.py`](../skeleton-multi-llm-en.py) |
+| Tableau des 20 décisions | 2 sur 3 et 3 sur 5 : 16/20 corrects chacun, 1 faux consensus (C10 / C02), 3 abstentions | [`td2-step1-vote.md`](../td2-step1-vote.md) |
+| Faux consensus | C10 : Cohere et Qwen à 119 410 contre 558 980, cause dans le `WHERE`, delta de 439 570 centimes sur 4 clients | section 2 |
+| Règle de routage | une ligne par famille, cellules TD 1, vérification par usage, conduite si indisponible | section 3 |
+| Simulateur | sorties avant et après adaptation | section 3.2 |
+| Relecture croisée | 11 relectures, toutes les corrections poussées | section 4 |
+
+## Étape 1 – Le vote k sur n
+
+`vote_k_sur_n` respecte les cinq règles de l'énoncé : seules les propositions exécutées avec une valeur votent, k est une majorité stricte, un doublon de couple fournisseur et modèle est refusé, une valeur qui atteint k est rendue avec ses modèles, sinon le vote s'abstient sans inventer de valeur. Après relecture, une valeur non entière est refusée au lieu d'être tronquée. Le tableau des 20 décisions est généré par [`compare-vote.py`](../compare-vote.py) ; les décisions brutes sont dans [`votes-20-questions.jsonl`](../votes-20-questions.jsonl) (panel fixe 2 sur 3, sortie d'`atelier-vote.py`) et [`votes-3of5.jsonl`](../votes-3of5.jsonl) (3 sur 5, panel exploratoire car il contient les deux `gpt-oss`).
+
+Les deux panels obtiennent 16/20 décisions correctes, 1 faux consensus et 3 abstentions, mais pas sur les mêmes questions : un quorum plus grand déplace les erreurs (C10 en 2 sur 3, C02 en 3 sur 5) sans les supprimer.
+
 ## Étape 2 – Le faux consensus
 
 ### 2.0 Mécanisme illustré : DEMO-VOTE (exemple construit)
@@ -361,3 +380,41 @@ python atelier-routage.py      > simulator-before.jsonl
 python atelier-routage-new.py  > simulator-after.jsonl
 ```
 
+## 4. Relecture croisée (code review)
+
+- **Pre code review** : commit `175f4b4`, état relu figé, répartition dans [`reviews/review-assignment.md`](../reviews/review-assignment.md). Personne ne relit son propre travail ; la règle et le simulateur (Q3) ont deux relecteurs.
+- **11 relectures** dans [`reviews/`](../reviews/) : vote (Akihito), tableau des décisions (Ismaël, Chandra), faux consensus (Vivien), politiques (Chandra, à la place de Nesrine), règle de routage (Baptiste, Adrian), simulateur (Adrian, Nazim), `compute_accuracy.py` (Baudouin), README (Antonin).
+- **Principaux constats** : le simulateur citait les cellules d'une ancienne répartition par famille et envoyait l'âge à la commande à Cohere, faux sur C10 ; la règle, les politiques et le simulateur choisissaient trois premiers modèles différents ; le vote tronquait une valeur non entière en un faux accord ; le script du tableau était absent.
+- **Corrections** : chaque constat est corrigé, avec le commit et son auteur dans la colonne « Fix », ou accepté avec une raison (la source de DEMO-SQL-C11, un double test sans effet dans `compute_accuracy.py`). Plan : [`reviews/fix-plan.md`](../reviews/fix-plan.md). **Post code review** : commit `a471bdf`.
+
+## 5. Contributions
+
+| Membre | Contribution TD 2 |
+|---|---|
+| Nazim Yacine | Plan de l'étape 2, DEMO-VOTE, DEMO-SQL-C11, chemin du bac à sable de `td2/`, relecture 6, rapport |
+| Baptiste Marseille | `vote_k_sur_n` dans `td1/`, cas C10 (quorums, requêtes, diagnostic, delta et sa vérification), relecture 5, corrections de la section 2 |
+| Akihito Raffin | Synthèse de l'étape 2 et `relecture.py`, relecture 1 |
+| Baudouin Parent | `vote_k_sur_n` dans `td2/`, tableau des 20 décisions, politiques, relecture 7, corrections du vote, du tableau et des politiques |
+| Antonin Charron | Règle de routage (section 3), sortie brute 2 sur 3, schéma d'architecture, relecture 8, correction de la règle |
+| Vivien Perrault | Adaptation puis reconstruction du simulateur, `compute_accuracy.py`, relecture 3 |
+| Ismaël Wane | Réorganisation du dépôt en `td1/`, `td2/`, `td3/`, chemin d'`atelier-vote.py`, relecture 2 |
+| Chandra R S Sukumar | README du TD 2, contrôle qualité de `compute_accuracy.py`, relectures 2 et 4 |
+| Adrian Bernard | Répartition des relectures et plan de correction, relectures 5 et 6, commits pre et post code review |
+| Nesrine Aissa | Prévue sur la relecture 4, reprise par Chandra R S Sukumar |
+
+Un assistant de code a été utilisé en aller-retour, par petits prompts successifs ; ses sorties ont été vérifiées manuellement au sein du sous-groupe.
+
+## 6. Limites
+
+- Une seule exécution par question à température 0 : C10 était juste au premier run de Qwen et faux à la relance ; les taux ne sont pas des taux d'erreur généraux.
+- Les familles F2b (une question) et F3 (quatre questions) reposent sur très peu de cas.
+- Le panel 3 sur 5 n'a pas des familles distinctes : il est exploratoire.
+- Sur F2, F2b et les combinaisons, tous les modèles gratuits éligibles passent par Groq.
+- Le simulateur s'abstient là où la politique P8 lancerait la requête de référence seule ; la disponibilité y est fournie par le scénario, pas mesurée.
+- DEMO-SQL-C11 n'a pas de source traçable dans le dépôt ; il est étiqueté cas historique rejoué.
+
+## 7. Suite (TD 3)
+
+- Chiffrer la vérification là où aucun modèle gratuit ne suffit seul : C02, C10, C15, C17 (trois modèles sur cinq en échec), et plus largement l'âge.
+- Comparer le coût de la route payante `openai/gpt-oss-120b#openrouter` (environ 0,000256 USD par appel) à celui d'une requête de référence et d'une revue humaine pour un paiement.
+- Tourner les rôles comme le demande le protocole.
