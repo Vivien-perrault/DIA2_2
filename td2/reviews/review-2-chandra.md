@@ -21,11 +21,11 @@ AI assistance was used to write the recomputation script; the results were read 
 
 | # | Severity | File:line | Finding | Evidence | Fix |
 |---|---|---|---|---|---|
-| 1 | important | `td2/td2-step1-vote.md:3` | The method cites a script `compare-vote.py` that is not in the repository: the table cannot be regenerated with the stated method. | `compare-vote.py` absent from the whole repository at `175f4b4`. | |
-| 2 | minor | `td2/td2-step1-vote.md:3` | File names are given without paths or links (`skeleton-multi-llm-en.py`, `traces-td1.csv`). Two copies of the skeleton exist (`td1/` and `td2/`); the method does not say which one was used. | Both implementations give the same 40 decisions (checked), so the result is not affected. | |
-| 3 | minor | `votes-20-questions.jsonl` | The raw vote output sits at the repository root instead of `td2/`, and no TD 2 document links to it. | `grep votes-20-questions` finds it only in `review-assignment.md`. | |
-| 4 | minor | `votes-20-questions.jsonl:1` | The file starts with a UTF-8 byte order mark (`EF BB BF`, typical of a PowerShell redirect): a standard JSONL reader fails on line 1. | `json.loads` raises "Unexpected UTF-8 BOM" on the first line. | |
-| 5 | minor | `votes-20-questions.jsonl` | The raw output covers the 2-of-3 panel only; the 3-of-5 column of the table has no raw output file. | 20 records, all with `n = 3`, `k = 2`. | |
+| 1 | important | `td2/td2-step1-vote.md:3` | The method cites a script `compare-vote.py` that is not in the repository: the table cannot be regenerated with the stated method. | `compare-vote.py` absent from the whole repository at `175f4b4`. | fixed in `bdfa625` (Baudouin Parent) |
+| 2 | minor | `td2/td2-step1-vote.md:3` | File names are given without paths or links (`skeleton-multi-llm-en.py`, `traces-td1.csv`). Two copies of the skeleton exist (`td1/` and `td2/`); the method does not say which one was used. | Both implementations give the same 40 decisions (checked), so the result is not affected. | fixed in `bdfa625` (Baudouin Parent) |
+| 3 | minor | `votes-20-questions.jsonl` | The raw vote output sits at the repository root instead of `td2/`, and no TD 2 document links to it. | `grep votes-20-questions` finds it only in `review-assignment.md`. | fixed in `bdfa625` (Baudouin Parent) |
+| 4 | minor | `votes-20-questions.jsonl:1` | The file starts with a UTF-8 byte order mark (`EF BB BF`, typical of a PowerShell redirect): a standard JSONL reader fails on line 1. | `json.loads` raises "Unexpected UTF-8 BOM" on the first line. | fixed in `1b05465` (Antonin Charron) |
+| 5 | minor | `votes-20-questions.jsonl` | The raw output covers the 2-of-3 panel only; the 3-of-5 column of the table has no raw output file. | 20 records, all with `n = 3`, `k = 2`. | fixed in `bdfa625` (Baudouin Parent) |
 
 ## What works
 
