@@ -59,7 +59,7 @@ Sortie exécutée (vote `vote_k_sur_n` de l'étape 1, dans `td2/skeleton-multi-l
 {"case": "C02", "nature": "real", "n": 3, "k": 2, "decision": {"consensus": true, "value": 590320, "votes": 2, "models": ["groq:openai/gpt-oss-120b", "groq:qwen/qwen3.8-27b"]}, "reference": 590320, "matches_reference": true}
 ```
 
-Pour C10, Cohere et Qwen votent pour 119 410 centimes et gpt-oss-120b vote pour 558 980. Le quorum donne 119 410 avec deux voix, un faux consensus. Pour C02, gpt-oss-120b et Qwen votent pour 590 320 centimes et Cohere vote pour 0. Le quorum donne 590 320 avec deux voix, conformément à la référence.
+Pour C10, Cohere et Qwen votent pour 119 410 centimes et gpt-oss-120b vote pour 558 980. Le quorum donne 119 410 avec deux voix, un faux consensus. Pour C02, gpt-oss-120b et Qwen votent pour 590 320 centimes et Cohere vote pour 0. Le quorum donne 590 320 avec deux voix, conformément à la référence. Les causes des trois zéros de C02 (trois clauses différentes) sont dans les notes de vérification du TD 1 : [lot B](../../td1/verif/verification-B.md), [lot C](../../td1/verif/verification-C.md), [lot E](../../td1/verif/verification-E.md).
 
 ### 2.3 Quorum de 3 sur 5
 
@@ -186,7 +186,7 @@ Baptiste a vérifié le résultat en Python sur les [trois CSV source](../../td1
 
 ### 2.7 Cas historique rejoué : DEMO-SQL-C11 (complément)
 
-> **Nature : cas historique rejoué.** Les requêtes M1 et M2 viennent du lot pilote de septembre 2026 et sont reproduites telles que l'énoncé TD2 les donne. Ce ne sont **pas** des traces de notre lot TD1. On les a seulement réexécutées sur `td1/data/boutique.sqlite`, ouverte en lecture seule. Notre cas principal reste C10.
+> **Nature : cas historique rejoué.** Les requêtes M1 et M2 viennent du lot pilote de septembre 2026 et sont reproduites telles que l'énoncé TD2 les donne. Ce ne sont **pas** des traces de notre lot TD1. On les a seulement réexécutées sur `td1/data/boutique.sqlite`, ouverte en lecture seule. Notre cas principal reste C10. Dans **notre** lot, gpt-oss-20b a juste sur C11 (446 690) ; Cohere renvoie aussi 0, mais avec une autre requête, et cette valeur fausse isolée est mise en minorité.
 
 **Question C11** : CA HT, en centimes, de toutes les commandes des clients âgés d'**exactement 25 ans** à la date de référence 2026-12-01.
 
@@ -287,12 +287,13 @@ La somme vaut exactement la référence : ces six clients expliquent **tout** l'
 
 1. **Comparaison à une référence indépendante** écrite et vérifiée par un humain, avec une autre formulation de l’âge (`date(birth_date, '+25 years') <= date(o.date) < date(birth_date, '+26 years')`). L’écart de 439 570 centimes apparaît aussitôt.
 2. **Requête delta par client**, qui localise l’écart. Les quatre clients manqués ont tous des commandes passées entre le 1er janvier et leur 26e anniversaire. Cela désigne la clause fautive sans relire les requêtes.
+3. **Contrôle générique de la convention d’âge**, utilisable sur une question qui n’a pas encore de référence : on recalcule en Python l’âge révolu de chaque ligne retenue par la requête (année d’écart, moins un si l’anniversaire n’est pas atteint), et on teste la requête sur des clients nés aux dates limites (veille, jour et lendemain de l’anniversaire). Une requête qui oublie « écart de 26 ans, anniversaire non atteint » échoue sur ce jeu de test sans référence écrite à la main. C’est la vérification déterministe que la règle de routage exige pour l’âge (section 3).
 
 Un panel élargi (3 sur 5) ne fait que **signaler un doute** sur C10, sans majorité. Ce doute peut déclencher une escalade vers ces contrôles, mais ne donne pas la bonne valeur. Sur C02, le même élargissement **crée** au contraire un faux consensus. Changer de panel est donc un contrôle candidat, pas une garantie.
 
 ### 2.9 Relecture croisée
 
-Le script [`td2/sql/relecture.py`](../sql/relecture.py) relance chaque requête et chaque vote des sections 2.0 à 2.7. Il compare chaque résultat au chiffre écrit dans le rapport. La base est ouverte en lecture seule et le vote utilise `vote_k_sur_n` du squelette TD1.
+Le script [`td2/sql/relecture.py`](../sql/relecture.py) relance chaque requête et chaque vote des sections 2.0 à 2.7. Il compare chaque résultat aux valeurs attendues **recopiées du rapport dans le script** : il ne lit pas `td2.md`, donc une modification du rapport doit être reportée dans le script. La base est ouverte en lecture seule et le vote utilise `vote_k_sur_n` du squelette TD1.
 
 ```sh
 python td2/sql/relecture.py

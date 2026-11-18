@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """TD2 étape 2.11 : relecture croisée. Relance chaque requête et chaque vote cités
-dans td2/reports/td2.md (sections 2.0 à 2.7) et compare au chiffre écrit dans le rapport.
+dans td2/reports/td2.md (sections 2.0 à 2.7) et compare aux valeurs attendues recopiées du rapport
+dans ce script (il ne lit pas td2.md : toute modification du rapport doit y être reportée).
 
     python td2/sql/relecture.py          # depuis la racine du dépôt
 
