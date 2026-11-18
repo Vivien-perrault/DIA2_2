@@ -64,3 +64,22 @@ Pour C10, gpt-oss-120b et gpt-oss-20b votent pour 558 980, Cohere et Qwen pour 1
 |---|---|---|---:|
 | C10 | 119 410, 2 voix, faux consensus | Aucun quorum, 2 voix par valeur et 1 sans vote | 558 980 |
 | C02 | 590 320, 2 voix, consensus correct | 0, 3 voix, faux consensus | 590 320 |
+
+### 2.4 Requêtes C10 exécutées sur SQLite
+
+Les requêtes complètes ont été extraites de la dernière tentative de chaque modèle dans les [traces TD1](../../td1/traces-td1.csv) et de la ligne C10 du [fichier de référence](../../td1/reference-td1.csv). Les trois fichiers ont été exécutés avec Python et SQLite sur `td1/data/boutique.sqlite`, ouverte en lecture seule.
+
+| Requête complète | Résultat (centimes) |
+|---|---:|
+| [Cohere North Mini Code](../sql/C10-cohere.sql) | 119 410 |
+| [Qwen 3.8-27B](../sql/C10-qwen.sql) | 119 410 |
+| [Référence C10](../sql/C10-reference.sql) | 558 980 |
+
+### 2.5 Diagnostic de la clause WHERE
+
+C10 demande le chiffre d’affaires HT des commandes passées quand le client avait exactement 25 ans. Les trois requêtes additionnent `o.quantity_product * p.price` et font les mêmes jointures internes sur `customer_id` et `product_id`. La référence filtre par date de commande, du 25e anniversaire inclus au 26e anniversaire exclu, avec `date(c.birth_date, '+25 years') <= date(o.date)` et `date(o.date) < date(c.birth_date, '+26 years')`.
+
+- **Cohere** exige un écart de 25 entre les années civiles et un mois-jour de commande supérieur ou égal au mois-jour de naissance. Cette condition couvre le 25e anniversaire jusqu’à la fin de l’année civile. Elle exclut les commandes passées l’année civile suivante avant le 26e anniversaire, où l’écart entre les années vaut 26 et le mois-jour est inférieur.
+- **Qwen** reprend la même condition dans sa première branche, en comparant le mois et le jour concaténés au format `MMDD`. Sa seconde branche exige un écart de 24 entre les années et un mois-jour de commande inférieur à celui de naissance. Cela correspond à un âge de 23 ans révolus. Pour couvrir le début de l’année du 26e anniversaire, cette branche devrait tester un écart de 26 en conservant la comparaison stricte du mois-jour.
+
+Les deux modèles omettent donc la même période. Qwen ajoute un filtre qui pourrait sélectionner des commandes de clients âgés de 23 ans. Sur cette base, l’exécution séparée de cette branche retourne zéro ligne de commande, tandis que sa première branche en retourne 14 pour 119 410 centimes. Cela explique pourquoi les deux requêtes donnent la même valeur.

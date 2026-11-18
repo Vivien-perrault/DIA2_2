@@ -58,6 +58,8 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 
 - **Quorums confirmés par exécution (étapes 3 et 4)**. C10 donne un faux consensus à 119410 centimes en 2 sur 3, puis aucun quorum en 3 sur 5 (2 voix à 119410, 2 à 558980, Dots sans vote). C02 donne le résultat correct de 590320 centimes en 2 sur 3, puis un faux consensus à 0 en 3 sur 5. Voir les sections 2.2 et 2.3 du rapport.
 
+- **Diagnostic SQL confirmé (étapes 5 et 6)**. Les trois requêtes C10 exécutées sur `boutique.sqlite` donnent 119410 (Cohere), 119410 (Qwen) et 558980 (référence), en centimes. Les deux modèles omettent les commandes de l’année du 26e anniversaire passées avant celui-ci. La seconde branche de Qwen cible un âge de 23 ans et sélectionne zéro ligne dans cette base. Voir les sections 2.4 et 2.5 du rapport.
+
 ## Étapes
 
 ### Partie 0 – Mécanisme (exemple jouet, pas un cas d'analyse)
@@ -78,10 +80,10 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 
 ### Partie B – Diagnostic de la clause SQL fautive
 
-- [ ] **Étape 5 – Récupérer et exécuter les requêtes**
+- [x] **Étape 5 – Récupérer et exécuter les requêtes** — fait par Baptiste le 2026-11-18
   Extraire de `traces-td1.csv` les **requêtes complètes** de cohere north-mini et qwen3.8-27b sur C10, ainsi que notre référence. Les sauvegarder dans `td2/sql/C10-cohere.sql`, `C10-qwen.sql` et `C10-reference.sql`. Les exécuter sur `td1/data/boutique.sqlite` et vérifier qu'on retrouve 119410 / 119410 / 558980.
 
-- [ ] **Étape 6 – Expliquer la condition WHERE / JOIN fautive**
+- [x] **Étape 6 – Expliquer la condition WHERE / JOIN fautive** — fait par Baptiste le 2026-11-18
   Comparer chaque requête clause par clause avec la référence. Quelle condition `WHERE`/`JOIN` réduit le résultat ? Expliquer **quelle fenêtre ou quel ensemble de lignes** chaque requête teste réellement, face à ce que demande la question. Les deux modèles font-ils la **même** erreur, ou deux erreurs différentes qui tombent sur la même valeur ?
 
 ### Partie C – Requête delta de diagnostic

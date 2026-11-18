@@ -1,0 +1,1 @@
+SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents FROM orders o JOIN product p ON o.product_id = p.product_id JOIN customers c ON o.customer_id = c.customer_id WHERE date(c.birth_date, '+25 years') <= date(o.date) AND date(c.birth_date, '+26 years') > date(o.date)
