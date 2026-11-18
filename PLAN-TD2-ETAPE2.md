@@ -60,6 +60,8 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 
 - **Diagnostic SQL confirmé (étapes 5 et 6)**. Les trois requêtes C10 exécutées sur `boutique.sqlite` donnent 119410 (Cohere), 119410 (Qwen) et 558980 (référence), en centimes. Les deux modèles omettent les commandes de l’année du 26e anniversaire passées avant celui-ci. La seconde branche de Qwen cible un âge de 23 ans et sélectionne zéro ligne dans cette base. Voir les sections 2.4 et 2.5 du rapport.
 
+- **Delta vérifié (étapes 7 et 8)**. Pour chaque modèle, les mêmes quatre clients expliquent les 439570 centimes manquants : C004 (150260), C005 (150240), C007 (118740) et C022 (20330). Aucun CA HT n’a été ajouté à tort. Baptiste a confirmé les montants par un calcul Python sur les trois CSV source. Voir le [SQL](td2/sql/delta-C10.sql) et la section 2.6 du rapport.
+
 ## Étapes
 
 ### Partie 0 – Mécanisme (exemple jouet, pas un cas d'analyse)
@@ -88,10 +90,10 @@ Les 5 modèles TD1 : `openai/gpt-oss-120b` (Groq), `openai/gpt-oss-20b` (Groq), 
 
 ### Partie C – Requête delta de diagnostic
 
-- [ ] **Étape 7 – Écrire et exécuter la requête delta**
+- [x] **Étape 7 – Écrire et exécuter la requête delta** — fait par Baptiste le 2026-11-18
   `SELECT` sur `boutique.sqlite` qui liste les `customer_id` et leur CA HT comptés par la référence mais manqués (ou ajoutés à tort) par les requêtes fautives. Piste : ensemble des lignes de la référence `EXCEPT` celui de la requête fautive, puis `GROUP BY customer_id`. Fichier `td2/sql/delta-C10.sql`, sortie collée dans le rapport.
 
-- [ ] **Étape 8 – Vérifier que le delta explique tout l'écart**
+- [x] **Étape 8 – Vérifier que le delta explique tout l'écart** — fait par Baptiste le 2026-11-18
   `SUM(delta)` doit valoir exactement **439570** centimes (558980 − 119410). Ajouter une méthode de vérification indépendante : requête réécrite à la main, ou calcul Python sur les lignes brutes. Noter qui a vérifié.
 
 ### Partie D – Cas historique DEMO-SQL-C11 (facultatif)

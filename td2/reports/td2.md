@@ -83,3 +83,19 @@ C10 demande le chiffre d’affaires HT des commandes passées quand le client av
 - **Qwen** reprend la même condition dans sa première branche, en comparant le mois et le jour concaténés au format `MMDD`. Sa seconde branche exige un écart de 24 entre les années et un mois-jour de commande inférieur à celui de naissance. Cela correspond à un âge de 23 ans révolus. Pour couvrir le début de l’année du 26e anniversaire, cette branche devrait tester un écart de 26 en conservant la comparaison stricte du mois-jour.
 
 Les deux modèles omettent donc la même période. Qwen ajoute un filtre qui pourrait sélectionner des commandes de clients âgés de 23 ans. Sur cette base, l’exécution séparée de cette branche retourne zéro ligne de commande, tandis que sa première branche en retourne 14 pour 119 410 centimes. Cela explique pourquoi les deux requêtes donnent la même valeur.
+
+### 2.6 Delta par client et vérification indépendante
+
+La [requête delta C10](../sql/delta-C10.sql) a été exécutée sur `boutique.sqlite` ouverte en lecture seule. Elle compare, pour chaque ligne de commande, le filtre de la référence aux filtres de Cohere et de Qwen, puis cumule le CA HT manquant et ajouté par client. Le delta soustrait le CA HT ajouté au CA HT manquant. Les deux modèles donnent la même sortie par client.
+
+| `customer_id` | CA HT manquant (centimes) | CA HT ajouté (centimes) | Delta (centimes) |
+|---|---:|---:|---:|
+| C004 | 150 260 | 0 | 150 260 |
+| C005 | 150 240 | 0 | 150 240 |
+| C007 | 118 740 | 0 | 118 740 |
+| C022 | 20 330 | 0 | 20 330 |
+| **Total par modèle** | **439 570** | **0** | **439 570** |
+
+Pour chaque modèle, la somme des deltas vaut exactement **558 980 − 119 410 = 439 570 centimes**.
+
+Baptiste a vérifié le résultat en Python sur les [trois CSV source](../../td1/data) `orders.csv`, `customers.csv` et `product.csv`. Pour chaque ligne, il a calculé l’âge révolu comme l’écart entre les années civiles diminué d’un an si la commande précède l’anniversaire dans l’année, puis multiplié la quantité par le prix unitaire. Le calcul retient les clients de 25 ans pour la référence, le sous-ensemble dont l’écart d’années est 25 pour Cohere, et ajoute à ce sous-ensemble les clients de 23 ans dont l’écart d’années est 24 pour Qwen. Il retrouve les trois totaux et les quatre deltas par client pour chacun des modèles.
